@@ -15,11 +15,10 @@
             margin: 0;
             padding: 30px;
             color: #333;
-            overflow-x: hidden; /* Evita sfarfallii durante l'animazione laterale */
         }
 
         .container {
-            max-width: 1800px;
+            max-width: 950px;
             margin: 0 auto;
             background: white;
             padding: 30px;
@@ -46,6 +45,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            position: relative;
         }
 
         .form-group.full-width {
@@ -65,6 +65,7 @@
             font-size: 16px;
             outline: none;
             box-sizing: border-box;
+            width: 100%;
         }
 
         input:focus {
@@ -72,7 +73,7 @@
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
-        /* MODIFICA: Il finto campo di selezione categoria */
+        /* Il finto campo di selezione categoria */
         .finto-select {
             padding: 12px;
             border: 1px solid #cbd5e1;
@@ -94,88 +95,85 @@
             color: #718096;
         }
 
-        /* MODIFICA: Il Menu a scelta laterale (Sidebar) */
-        .sidebar-categorie {
-            position: fixed;
+        /* Menu ancorato lateralmente al campo Categoria */
+        .menu-laterale-campo {
+            position: absolute;
             top: 0;
-            right: -320px; /* Nascosto inizialmente fuori dallo schermo a destra */
-            width: 300px;
-            height: 100%;
+            left: 100%;
+            width: 240px;
             background-color: #ffffff;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
-            z-index: 1000;
-            padding: 25px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            padding: 15px;
             box-sizing: border-box;
-            /* Transizione fluida di esattamente 1 secondo richiesta */
-            transition: right 1s cubic-bezier(0.16, 1, 0.3, 1); 
+            margin-left: 10px;
+            
+            visibility: hidden;
+            opacity: 0;
+            transform: translateX(-20px) scale(0.95);
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                        opacity 1s cubic-bezier(0.16, 1, 0.3, 1), 
+                        visibility 1s;
         }
 
-        /* Classe attivata via JS per far scorrere la sidebar all'interno dello schermo */
-        .sidebar-categorie.aperta {
-            right: 0;
+        .menu-laterale-campo.aperto {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(0) scale(1);
         }
 
-        .sidebar-categorie h3 {
+        .menu-laterale-campo h3 {
             margin-top: 0;
+            font-size: 15px;
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        /* Pulsante per chiudere la sidebar */
-        .btn-chiudi-sidebar {
+        .btn-chiudi-menu {
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
             color: #a0aec0;
+            padding: 0;
         }
-        .btn-chiudi-sidebar:hover { color: #e53e3e; }
+        .btn-chiudi-menu:hover { color: #e53e3e; }
 
-        /* Lista dei bottoni-categoria interni alla sidebar */
         .opzioni-lista {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 6px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
+
+        .opzioni-lista::-webkit-scrollbar { width: 4px; }
+        .opzioni-lista::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         .btn-opzione {
             background-color: #f7fafc;
             border: 1px solid #e2e8f0;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
-            font-size: 16px;
+            font-size: 14px;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
             font-weight: 500;
         }
         .btn-opzione:hover {
-            background-color: #e2e8f0;
-            border-color: #cbd5e1;
-            padding-left: 18px; /* Piccolo effetto grafico di spostamento al passaggio del mouse */
-        }
-
-        /* Sfondo scuro semitrasparente che copre il resto del sito quando la sidebar è aperta */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.4);
-            z-index: 999;
-            display: none;
-            opacity: 0;
-            transition: opacity 1s;
-        }
-        .overlay.attivo {
-            display: block;
-            opacity: 1;
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+            padding-left: 14px;
         }
 
         /* Pulsanti */
@@ -204,8 +202,12 @@
             margin-bottom: 15px;
         }
 
-        .btn-esporta { background-color: #2ecc71; }
-        .btn-esporta:hover { background-color: #27ae60; }
+        /* Colore blu per indicare l'azione cloud sul server */
+        .btn-server {
+            background-color: #2ecc71;
+        }
+        .btn-server:hover { background-color: #27ae60; }
+        .btn-server:disabled { background-color: #a0aec0; cursor: not-allowed; }
 
         .btn-reset { background-color: #e53e3e; }
         .btn-reset:hover { background-color: #c53030; }
@@ -263,27 +265,6 @@
 </head>
 <body>
 
-    <!-- SFONDO SCURO DI COPERTURA -->
-    <div class="overlay" id="overlaySito"></div>
-
-    <!-- MENU LATERALE DELLE CATEGORIE -->
-    <div class="sidebar-categorie" id="sidebarCategorie">
-        <h3>
-            Scegli Categoria 
-            <button class="btn-chiudi-sidebar" id="btnChiudiSidebar">&times;</button>
-        </h3>
-        <div class="opzioni-lista">
-            <button class="btn-opzione" data-valore="Frutta">Frutta</button>
-            <button class="btn-opzione" data-valore="Verdure">Verdure</button>
-            <button class="btn-opzione" data-valore="Carboidrati">Carboidrati</button>
-            <button class="btn-opzione" data-valore="Carne">Carne</button>
-            <button class="btn-opzione" data-valore="Pesce">Pesce</button>
-            <button class="btn-opzione" data-valore="Latticini">Latticini</option>
-            <button class="btn-opzione" data-valore="Uova">Uova</button>
-            <button class="btn-opzione" data-valore="Altro">Altro</button>
-        </div>
-    </div>
-
     <div class="container">
         <h1>Dispensa Smart - Gestione Spesa</h1>
         
@@ -295,10 +276,27 @@
                 <input type="text" id="nomeProdotto" placeholder="Es. Pane integrale, Petto di pollo..." autocomplete="off">
             </div>
 
-            <!-- Categoria (Modificato: Finto input cliccabile anziché select) -->
+            <!-- Categoria -->
             <div class="form-group">
                 <label>Categoria (Classe):</label>
                 <div class="finto-select" id="campoCategoria">Seleziona...</div>
+                
+                <div class="menu-laterale-campo" id="menuCategorie">
+                    <h3>
+                        Scegli Categoria 
+                        <button class="btn-chiudi-menu" id="btnChiudiMenu">&times;</button>
+                    </h3>
+                    <div class="opzioni-lista">
+                        <button class="btn-opzione" data-valore="Frutta">Frutta</button>
+                        <button class="btn-opzione" data-valore="Verdure">Verdure</button>
+                        <button class="btn-opzione" data-valore="Carboidrati">Carboidrati</button>
+                        <button class="btn-opzione" data-valore="Carne">Carne</button>
+                        <button class="btn-opzione" data-valore="Pesce">Pesce</button>
+                        <button class="btn-opzione" data-valore="Latticini">Latticini</button>
+                        <button class="btn-opzione" data-valore="Uova">Uova</button>
+                        <button class="btn-opzione" data-valore="Altro">Altro</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Prezzo Unitario -->
@@ -335,9 +333,10 @@
         </div>
 
         <!-- SEZIONE TABELLA INVENTARIO -->
-        <div id="sezioneInventario" style="display: none;">
+        <div id="sezenieInventario" style="display: none;">
             <div class="action-buttons">
-                <button class="btn btn-esporta" id="btnEsporta">Esporta Inventario in Excel</button>
+                <!-- MODIFICATO: Pulsante per inviare dati al database server invece del file CSV -->
+                <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
                 <button class="btn btn-reset" id="btnReset">Svuota Dispensa</button>
             </div>
             
@@ -364,7 +363,7 @@
     </div>
 
     <!-- LOGICA JAVASCRIPT -->
-     <script>
+    <script>
         // CONFIGURAZIONE CHIAVI DI CONDIZIONE DI ESEMPIO SUPABASE
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "sb_secret_Txo7A-VvGOqUAZ1sPyujOg_s4bLMFmo";
@@ -586,3 +585,4 @@
     </script>
 </body>
 </html>
+
