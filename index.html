@@ -387,7 +387,7 @@
 
 <script>
 
-    const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
+    const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI3MTQ3MSwiZXhwIjoyMDk0ODQ3NDcxfQ.DAjgXTsXsam82wgJw9L1k1C-T37FHdmVZCOkeWjnuV0";
 
     const supabaseClient = supabase.createClient(
@@ -688,16 +688,17 @@ btnExportCSV.addEventListener('click', () => {
 
         try {
 
-            const dati = inventario.map(item => ({
+           const dati = inventario.map(item => ({
 
-                nome: item.nome,
-                classe: item.classe,
-                prezzo: item.prezzo,
-                quantita: item.quantita,
-                acquisto: item.acquisto,
-                scadenza: item.scadenza
+    nome: item.nome,
+    classe: item.classe,
+    prezzo: item.prezzo,
+    quantita: item.quantita,
+    totale_riga: item.costoRiga,
+    acquisto: item.acquisto,
+    scadenza: item.scadenza
 
-            }));
+}));
 
             const { error } = await supabaseClient
                 .from('prodotti')
