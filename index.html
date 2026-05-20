@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Dispensa Smart - Gestione Inventario Casa</title>
     
+    <!-- INCLUSIONE DELLA LIBRERIA CLIENT UFFICIALE DI SUPABASE VIA CDN -->
+    <script src="https://jsdelivr.net"></script>
+    
     <style>
         /* Stili Generali */
         body {
@@ -361,10 +364,17 @@
     </div>
 
     <!-- LOGICA JAVASCRIPT -->
-    <script>
+     <script>
+        // CONFIGURAZIONE CHIAVI DI CONDIZIONE DI ESEMPIO SUPABASE
+        const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
+        const SUPABASE_KEY = "sb_secret_Txo7A-VvGOqUAZ1sPyujOg_s4bLMFmo";
+        
+        // Inizializza il client Supabase globale
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let inventario = [];
         let totaleEconomico = 0;
-        let categoriaSelezionata = ""; // Memorizza il valore scelto dalla sidebar
+        let categoriaSelezionata = "";
 
         const inputNome = document.getElementById('nomeProdotto');
         const campoCategoria = document.getElementById('campoCategoria');
@@ -374,16 +384,14 @@
         const inputScadenza = document.getElementById('dateScadenza');
         
         const btnAggiungi = document.getElementById('btnAggiungi');
-        const btnEsporta = document.getElementById('btnEsporta');
+        const btnInviaServer = document.getElementById('btnInviaServer');
         const btnReset = document.getElementById('btnReset');
         const corpoTabella = document.getElementById('corpoTabella');
         const areaSpesa = document.getElementById('totaleSpesa');
-        const sezioneInventario = document.getElementById('sezioneInventario');
+        const sezioneInventario = document.getElementById('sezenieInventario');
 
-        // Elementi per la gestione della Sidebar
-        const sidebar = document.getElementById('sidebarCategorie');
-        const overlay = document.getElementById('overlaySito');
-        const btnChiudiSidebar = document.getElementById('btnChiudiSidebar');
+        const menuDinamico = document.getElementById('menuCategorie');
+        const btnChiudiMenu = document.getElementById('btnChiudiMenu');
         const bottoniOpzione = document.querySelectorAll('.btn-opzione');
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -396,45 +404,47 @@
             caricaDatiSito();
         });
 
-        // GESTIONE SIDEBAR: Aprire la sidebar
-        campoCategoria.addEventListener('click', () => {
-            sidebar.classList.add('aperta');
-            overlay.classList.add('attivo');
+        // Gestione Menu Categorie
+        campoCategoria.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDinamico.classList.toggle('aperto');
         });
 
-        // GESTIONE SIDEBAR: Chiudere la sidebar (cliccando la X o lo sfondo scuro)
-        function chiudiSidebarMenu() {
-            sidebar.classList.remove('aperta');
-            overlay.classList.remove('attivo');
+        function chiudiMenu() {
+            menuDinamico.classList.remove('aperto');
         }
-        btnChiudiSidebar.addEventListener('click', chiudiSidebarMenu);
-        overlay.addEventListener('click', chiudiSidebarMenu);
+        btnChiudiMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            chiudiMenu();
+        });
 
-        // GESTIONE SIDEBAR: Selezione di un valore
+        document.addEventListener('click', chiudiMenu);
+        menuDinamico.addEventListener('click', (e) => { e.stopPropagation(); });
+
         bottoniOpzione.forEach(bottone => {
             bottone.addEventListener('click', (e) => {
                 categoriaSelezionata = e.target.getAttribute('data-valore');
-                campoCategoria.innerText = categoriaSelezionata; // Scrive il valore nel form principale
-                campoCategoria.style.borderColor = "#cbd5e1"; // Eventuale reset colore errore
-                chiudiSidebarMenu();
+                campoCategoria.innerText = categoriaSelezionata;
+                campoCategoria.style.borderColor = "#cbd5e1";
+                chiudiMenu();
             });
         });
 
-        // Azione: Aggiunta Prodotto
+        // Azione: Aggiunta Prodotto Locale
         btnAggiungi.addEventListener('click', function() {
             const nome = inputNome.value.trim();
-            const classe = categoriaSelezionata; // Legge la variabile della sidebar
+            const classe = categoriaSelezionata;
             const prezzo = parseFloat(inputPrezzo.value);
             const quantita = parseInt(inputQuantita.value);
             const acquisto = inputAcquisto.value;
             const scadenza = inputScadenza.value;
 
             if (nome === "") { alert("Inserisci il nome del prodotto!"); return; }
-            if (classe === "") { alert("Seleziona una categoria dalla lista laterale!"); campoCategoria.style.borderColor = "#e53e3e"; return; }
+            if (classe === "") { alert("Seleziona una categoria!"); campoCategoria.style.borderColor = "#e53e3e"; return; }
             if (isNaN(prezzo) || prezzo < 0) { alert("Inserisci un prezzo valido!"); return; }
             if (isNaN(quantita) || quantita < 1) { alert("Inserisci una quantità valida!"); return; }
             if (!acquisto) { alert("Seleziona la data di acquisto!"); return; }
-            if (!scadenza) { alert("Seleziona la data di scadenza!"); return; }
+            if (!scadenza) { alert("Seleziona la data di scarsa!"); return; }
 
             const costoRiga = prezzo * quantita;
             const idProdotto = Date.now();
@@ -455,7 +465,6 @@
             renderizzaRigaTabella(nuovoProdotto);
             aggiornaPrezzoTotale();
 
-            // Svuota i moduli (inclusa la finta selezione)
             inputNome.value = "";
             inputPrezzo.value = "";
             inputQuantita.value = "1";
@@ -519,7 +528,7 @@
         }
 
         btnReset.addEventListener('click', function() {
-            const conferma = confirm("Vuoi davvero svuotare tutto l'inventario? I dati inseriti andranno persi in modo definitivo.");
+            const conferma = confirm("Vuoi davvero svuotare tutto l'inventario locale? I dati inseriti andranno persi.");
             if (conferma) {
                 localStorage.removeItem('inventarioSpesa_LocalStorage');
                 inventario = [];
@@ -528,26 +537,51 @@
             }
         });
 
-        btnEsporta.addEventListener('click', function() {
-            if (inventario.length === 0) return;
+        // MODIFICA PRINCIPALE: Invio asincrono via API di Supabase al server remoto
+        btnInviaServer.addEventListener('click', async function() {
+            if (inventario.length === 0) {
+                alert("Non ci sono prodotti da salvare sul database remoto!");
+                return;
+            }
 
-            let contenutoCSV = "Prodotto;Categoria;Prezzo Unitario (€);Quantita;Totale Riga (€);Data Acquisto;Data Scadenza\n";
+            // Cambiamo lo stato visivo del pulsante per evitare clic ripetuti
+            btnInviaServer.disabled = true;
+            btnInviaServer.innerText = "Salvataggio cloud in corso...";
 
-            inventario.forEach(item => {
-                contentsCSV += `${item.nome};${item.classe};${item.prezzo.toFixed(2)};${item.quantita};${item.costoRiga.toFixed(2)};${formattaData(item.acquisto)};${formattaData(item.scadenza)}\n`;
-            });
+            // Mappiamo l'array locale adattando le proprietà ai nomi delle colonne del DB
+            const datiDaInviare = inventario.map(item => ({
+                nome: item.nome,
+                classe: item.classe,
+                prezzo: item.prezzo,
+                quantita: item.quantita,
+                acquisto: item.acquisto,
+                scadenza: item.scadenza
+            }));
 
-            const blob = new Blob(["\uFEFF" + contenutoCSV], { type: 'text/csv;charset=utf-8;' });
-            const linkDownload = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            linkDownload.setAttribute("href", url);
-            linkDownload.setAttribute("download", "inventario_spesa_casa.csv");
-            linkDownload.style.visibility = 'hidden';
-            
-            document.body.appendChild(linkDownload);
-            linkDownload.click();
-            document.body.removeChild(linkDownload);
+            try {
+                // Esegue una richiesta HTTP POST strutturata alla tabella 'prodotti' [3]
+                const { data, error } = await supabase
+                    .from('prodotti')
+                    .insert(datiDaInviare);
+
+                if (error) throw error; // Se il server risponde con un errore, interrompe ed entra nel blocco catch
+
+                alert("Fantastico! Tutti i dati sono stati registrati con successo nel database cloud.");
+                
+                // Pulisce l'inventario corrente locale dopo il corretto caricamento sul server
+                localStorage.removeItem('inventarioSpesa_LocalStorage');
+                inventario = [];
+                corpoTabella.innerHTML = "";
+                aggiornaPrezzoTotale();
+
+            } catch (err) {
+                console.error("Dettaglio Errore Server:", err);
+                alert("Impossibile salvare i dati. Verifica di aver inserito il tuo URL e la KEY reali in cima allo script JavaScript.");
+            } finally {
+                // Ripristina lo stato iniziale del pulsante graficamente
+                btnInviaServer.disabled = false;
+                btnInviaServer.innerText = "Salva sul Database Cloud";
+            }
         });
     </script>
 </body>
