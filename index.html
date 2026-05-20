@@ -366,8 +366,11 @@
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzE0NzEsImV4cCI6MjA5NDg0NzQ3MX0.83Vn6ji8exk_zesh0kiJjBTZsNFjHewHRqKyy6N7xl8";
         
-        // Inizializzazione diretta e stabile del client Supabase
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inizializzazione sicura del client Supabase
+        let supabaseClient = null;
+        if (typeof window.supabase !== 'undefined') {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -393,7 +396,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const oggi = new Date();
-            const anno = oggi.getFullYear();
+            const anno = Thread = oggi.getFullYear();
             const mese = String(oggi.getMonth() + 1).padStart(2, '0');
             const giorno = String(oggi.getDate()).padStart(2, '0');
             
@@ -419,9 +422,9 @@
         document.addEventListener('click', chiudiMenu);
         menuDinamico.addEventListener('click', (e) => { e.stopPropagation(); });
 
-        // Gestione selezione opzioni laterali
+        // RISOLTO: Gestione corretta della selezione senza errori di sintassi
         bottoniOpzione.forEach(bottone => {
-            bottom = bottone.addEventListener('click', (e) => {
+            bottone.addEventListener('click', (e) => {
                 categoriaSelezionata = e.target.getAttribute('data-valore');
                 campoCategoria.innerText = categoriaSelezionata;
                 campoCategoria.style.borderColor = "#cbd5e1";
@@ -464,7 +467,7 @@
             renderizzaRigaTabella(nuovoProdotto);
             aggiornaPrezzoTotale();
 
-            // Pulisce i campi di inserimento
+            // Pulisce i campi
             inputNome.value = "";
             inputPrezzo.value = "";
             inputQuantita.value = "1";
@@ -502,7 +505,7 @@
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
             if(parti.length !== 3) return dataStringa;
-            return `${parti}/${parti}/${parti}`;
+            return `${parti[2]}/${parti[1]}/${parti[0]}`; // Ordinamento corretto GG/MM/AAAA
         }
 
         window.eliminaProdotto = function(id) {
@@ -540,7 +543,6 @@
 
         // Invio via API al database cloud
         btnInviaServer.addEventListener('click', async function() {
-            // Controllo bloccante se le chiavi non sono state modificate
             if (SUPABASE_URL === "https://IL_TUO_PROJECT_URL.supabase.co") {
                 alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
                 return;
@@ -578,7 +580,7 @@
 
             } catch (err) {
                 console.error("Dettaglio Errore Server:", err);
-                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la configurazione o la tabella su Supabase.");
+                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la console del browser o i permessi della tabella prodotti su Supabase.");
             } finally {
                 btnInviaServer.disabled = false;
                 btnInviaServer.innerText = "Salva sul Database Cloud";
@@ -587,6 +589,3 @@
     </script>
 </body>
 </html>
-
-
-
