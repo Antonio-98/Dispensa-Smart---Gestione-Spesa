@@ -5,7 +5,7 @@
     <title>Dispensa Smart - Gestione Inventario Casa</title>
     
     <!-- INCLUSIONE DELLA LIBRERIA CLIENT UFFICIALE DI SUPABASE VIA CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://jsdelivr.net"></script>
     
     <style>
         /* Stili Generali */
@@ -319,7 +319,7 @@
             <!-- Data di Scadenza -->
             <div class="form-group full-width" style="grid-column: span 2;">
                 <label for="dataScadenza">Data di Scadenza:</label>
-                <input type="date" id="dateScadenza">
+                <input type="date" id="dataScadenza">
             </div>
 
             <!-- Pulsante inserimento -->
@@ -331,7 +331,7 @@
             Totale Spesa Corrente: € <span id="totaleSpesa">0.00</span>
         </div>
 
-        <!-- SEZIONE TABELLA INVENTARIO -->
+        <!-- SEZIONE TABELLA INVENTARIO (Risolto refuso ID) -->
         <div id="sezioneInventario" style="display: none;">
             <div class="action-buttons">
                 <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
@@ -366,8 +366,13 @@
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "sb_secret_Txo7A-VvGOqUAZ1sPyujOg_s4bLMFmo";
         
-        // Estrazione e inizializzazione del client globale in modo sicuro per CDN
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inizializzazione sicura del client
+        let supabaseClient;
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) {
+            console.log("Supabase non inizializzato con chiavi reali.");
+        }
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -378,7 +383,7 @@
         const inputPrezzo = document.getElementById('prezzoProdotto');
         const inputQuantita = document.getElementById('quantitaProdotto');
         const inputAcquisto = document.getElementById('dataAcquisto');
-        const inputScadenza = document.getElementById('dateScadenza');
+        const inputScadenza = document.getElementById('dataScadenza');
         
         const btnAggiungi = document.getElementById('btnAggiungi');
         const btnInviaServer = document.getElementById('btnInviaServer');
@@ -401,7 +406,7 @@
             caricaDatiSito();
         });
 
-        // Gestione Menu Categorie (Apertura al clic sul finto input)
+        // Gestione Menu Categorie (Apertura)
         campoCategoria.addEventListener('click', (e) => {
             e.stopPropagation();
             menuDinamico.classList.toggle('aperto');
@@ -464,7 +469,7 @@
             renderizzaRigaTabella(nuovoProdotto);
             aggiornaPrezzoTotale();
 
-            // Pulisce i campi
+            // Pulisce i campi di input
             inputNome.value = "";
             inputPrezzo.value = "";
             inputQuantita.value = "1";
@@ -501,7 +506,7 @@
         function formattaData(dataStringa) {
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
-            return `${parti[2]}/${parti[1]}/${parti[0]}`; // Corretto l'ordine in GG/MM/AAAA
+            return `${parti[2]}/${parti[1]}/${parti[0]}`; // Risolto ordine di visualizzazione GG/MM/AAAA
         }
 
         window.eliminaProdotto = function(id) {
@@ -537,8 +542,12 @@
             }
         });
 
-        // Invio asincrono via API di Supabase al server remoto
+        // Invio via API al database
         btnInviaServer.addEventListener('click', async function() {
+            if (!supabaseClient) {
+                alert("Configura prima l'URL e la KEY di Supabase in cima allo script!");
+                return;
+            }
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da salvare sul database remoto!");
                 return;
@@ -557,7 +566,6 @@
             }));
 
             try {
-                // Utilizza l'istanza corretta supabaseClient
                 const { data, error } = await supabaseClient
                     .from('prodotti')
                     .insert(datiDaInviare);
