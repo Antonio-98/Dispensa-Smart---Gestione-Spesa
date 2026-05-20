@@ -362,19 +362,12 @@
 
     <!-- LOGICA JAVASCRIPT -->
     <script>
-        // CONFIGURAZIONE CHIAVI DI CONDIZIONE DI ESEMPIO SUPABASE
+        // Sostituisci qui dentro le stringhe con i tuoi dati reali presi da Supabase
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzE0NzEsImV4cCI6MjA5NDg0NzQ3MX0.83Vn6ji8exk_zesh0kiJjBTZsNFjHewHRqKyy6N7xl8";
         
-        // Inizializzazione sicura e condizionale del client Supabase
-        let supabaseClient = null;
-        if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== "https://orskvejphkihjqblruvx.supabase.co/rest/v1/") {
-            try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            } catch(e) {
-                console.error("Errore inizializzazione Supabase:", e);
-            }
-        }
+        // Inizializzazione diretta e stabile del client Supabase
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -428,7 +421,7 @@
 
         // Gestione selezione opzioni laterali
         bottoniOpzione.forEach(bottone => {
-            bottone.addEventListener('click', (e) => {
+            bottom = bottone.addEventListener('click', (e) => {
                 categoriaSelezionata = e.target.getAttribute('data-valore');
                 campoCategoria.innerText = categoriaSelezionata;
                 campoCategoria.style.borderColor = "#cbd5e1";
@@ -509,7 +502,7 @@
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
             if(parti.length !== 3) return dataStringa;
-            return `${parti[2]}/${parti[1]}/${parti[0]}`;
+            return `${parti}/${parti}/${parti}`;
         }
 
         window.eliminaProdotto = function(id) {
@@ -547,7 +540,8 @@
 
         // Invio via API al database cloud
         btnInviaServer.addEventListener('click', async function() {
-            if (!supabaseClient) {
+            // Controllo bloccante se le chiavi non sono state modificate
+            if (SUPABASE_URL === "https://IL_TUO_PROJECT_URL.supabase.co") {
                 alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
                 return;
             }
@@ -584,7 +578,7 @@
 
             } catch (err) {
                 console.error("Dettaglio Errore Server:", err);
-                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la console del browser.");
+                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la configurazione o la tabella su Supabase.");
             } finally {
                 btnInviaServer.disabled = false;
                 btnInviaServer.innerText = "Salva sul Database Cloud";
@@ -593,5 +587,6 @@
     </script>
 </body>
 </html>
+
 
 
