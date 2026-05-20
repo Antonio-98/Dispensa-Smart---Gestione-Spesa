@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -68,589 +68,151 @@
             width: 100%;
         }
 
-        input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-
-        /* Il finto campo di selezione categoria */
-        .finto-select {
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 16px;
-            background-color: #fff;
-            cursor: pointer;
-            text-align: left;
-            font-weight: normal;
-            color: #333;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .finto-select::after {
-            content: "▼";
-            font-size: 11px;
-            color: #718096;
-        }
-
-        /* Menu ancorato lateralmente al campo Categoria */
-        .menu-laterale-campo {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            width: 240px;
-            background-color: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
-            z-index: 100;
-            padding: 15px;
-            box-sizing: border-box;
-            margin-left: 10px;
-            
-            visibility: hidden;
-            opacity: 0;
-            transform: translateX(-20px) scale(0.95);
-            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), 
-                        opacity 1s cubic-bezier(0.16, 1, 0.3, 1), 
-                        visibility 1s;
-        }
-
-        .menu-laterale-campo.aperto {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(0) scale(1);
-        }
-
-        .menu-laterale-campo h3 {
-            margin-top: 0;
-            font-size: 15px;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-chiudi-menu {
-            background: none;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            color: #a0aec0;
-            padding: 0;
-        }
-        .btn-chiudi-menu:hover { color: #e53e3e; }
-
-        .opzioni-lista {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .opzioni-lista::-webkit-scrollbar { width: 4px; }
-        .opzioni-lista::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        .btn-opzione {
-            background-color: #f7fafc;
-            border: 1px solid #e2e8f0;
-            padding: 10px;
-            text-align: left;
-            font-size: 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-        .btn-opzione:hover {
-            background-color: #3498db;
-            color: white;
-            border-color: #3498db;
-            padding-left: 14px;
-        }
-
         /* Pulsanti */
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
         .btn {
-            color: white;
-            border: none;
-            padding: 14px;
+            padding: 12px 24px;
             font-size: 16px;
             font-weight: bold;
+            border: none;
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.2s;
         }
 
-        .btn-aggiungi {
+        .btn-primary {
             background-color: #3498db;
-            width: 100%;
-            grid-column: span 3;
-        }
-        .btn-aggiungi:hover { background-color: #2980b9; }
-
-        .action-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .btn-server {
-            background-color: #2ecc71;
-        }
-        .btn-server:hover { background-color: #27ae60; }
-        .btn-server:disabled { background-color: #a0aec0; cursor: not-allowed; }
-
-        /* Stile azzurro per il bottone CSV locale richiesto */
-        .btn-csv {
-            background-color: #17a2b8;
-        }
-        .btn-csv:hover { background-color: #138496; }
-
-        .btn-reset { background-color: #e53e3e; }
-        .btn-reset:hover { background-color: #c53030; }
-
-        /* Area Riepilogo Spesa */
-        .recap-box {
-            background-color: #ebf8ff;
-            border-left: 4px solid #3182ce;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #2b6cb0;
-        }
-
-        /* Tabella Inventario */
-        .table-container {
-            margin-top: 20px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f7fafc;
-            color: #4a5568;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        .btn-elimina {
-            background: #e53e3e;
             color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
         }
-        .btn-elimina:hover { background: #c53030; }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #27ae60;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Dispensa Smart - Gestione Spesa</h1>
-        
-        <!-- FORM DI INSERIMENTO PRODOTTI -->
-        <div class="form-grid">
-            <!-- Nome Prodotto -->
-            <div class="form-group full-width">
-                <label for="nomeProdotto">Nome Prodotto:</label>
-                <input type="text" id="nomeProdotto" placeholder="Es. Pane integrale, Petto di pollo..." autocomplete="off">
-            </div>
-
-            <!-- Categoria -->
-            <div class="form-group">
-                <label>Categoria (Classe):</label>
-                <div class="finto-select" id="campoCategoria">Seleziona...</div>
-                
-                <div class="menu-laterale-campo" id="menuCategorie">
-                    <h3>
-                        Scegli Categoria 
-                        <button class="btn-chiudi-menu" id="btnChiudiMenu">&times;</button>
-                    </h3>
-                    <div class="opzioni-lista">
-                        <button class="btn-opzione" data-valore="Frutta">Frutta</button>
-                        <button class="btn-opzione" data-valore="Verdure">Verdure</button>
-                        <button class="btn-opzione" data-valore="Carboidrati">Carboidrati</button>
-                        <button class="btn-opzione" data-valore="Carne">Carne</button>
-                        <button class="btn-opzione" data-valore="Pesce">Pesce</button>
-                        <button class="btn-opzione" data-valore="Latticini">Latticini</button>
-                        <button class="btn-opzione" data-valore="Uova">Uova</button>
-                        <button class="btn-opzione" data-valore="Altro">Altro</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Prezzo Unitario -->
-            <div class="form-group">
-                <label for="prezzoProdotto">Prezzo Unitario (€):</label>
-                <input type="number" id="prezzoProdotto" step="0.01" min="0" placeholder="0.00" inputmode="decimal">
-            </div>
-
-            <!-- Quantità -->
-            <div class="form-group">
-                <label for="quantitaProdotto">Quantità:</label>
-                <input type="number" id="quantitaProdotto" min="1" value="1" inputmode="numeric">
-            </div>
-
-            <!-- Data di Acquisto -->
-            <div class="form-group">
-                <label for="dataAcquisto">Giorno di Acquisto:</label>
-                <input type="date" id="dataAcquisto">
-            </div>
-
-            <!-- Data di Scadenza -->
-            <div class="form-group full-width" style="grid-column: span 2;">
-                <label for="dataScadenza">Data di Scadenza:</label>
-                <input type="date" id="dataScadenza">
-            </div>
-
-            <!-- Pulsante inserimento -->
-            <button class="btn btn-aggiungi" id="btnAggiungi">Inserisci Prodotto nell'Inventario</button>
-        </div>
-
-        <!-- RIEPILOGO SPESA TOTALE -->
-        <div class="recap-box">
-            Totale Spesa Corrente: € <span id="totaleSpesa">0.00</span>
-        </div>
-
-        <!-- SEZIONE TABELLA INVENTARIO -->
-        <div id="sezioneInventario" style="display: none;">
-            <div class="action-buttons">
-                <!-- AGGIUNTO: Gruppo bottoni con Cloud, il nuovo CSV e Reset -->
-                <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
-                <button class="btn btn-csv" id="btnEsportaCSV">Esporta in CSV (Excel)</button>
-                <button class="btn btn-reset" id="btnReset">Svuota Dispensa</button>
-            </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Prodotto</th>
-                            <th>Categoria</th>
-                            <th>Prezzo Unitario</th>
-                            <th>Q.tà</th>
-                            <th>Totale Riga</th>
-                            <th>Acquisto</th>
-                            <th>Scadenza</th>
-                            <th>Azione</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpoTabella">
-                        <!-- Righe popolate da JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="container">
+    <h1>Dispensa Smart</h1>
+    
+    <!-- Esempio di Form per i dati richiesti -->
+    <div class="form-grid">
+        <div class="form-group"><label>Nome</label><input type="text" id="nome"></div>
+        <div class="form-group"><label>Classe</label><input type="text" id="classe"></div>
+        <div class="form-group"><label>Prezzo (€)</label><input type="number" step="0.01" id="prezzo" oninput="calcolaTotale()"></div>
+        <div class="form-group"><label>Quantità</label><input type="number" id="quantita" oninput="calcolaTotale()"></div>
+        <div class="form-group"><label>Totale Riga (€)</label><input type="number" id="totale_riga" readonly></div>
+        <div class="form-group"><label>Acquisto</label><input type="date" id="acquisto"></div>
+        <div class="form-group"><label>Scadenza</label><input type="date" id="scadenza"></div>
     </div>
 
-    <!-- LOGICA JAVASCRIPT -->
-    <script>
-        // CONFIGURAZIONE CHIAVI DI SUPABASE
+    <div class="btn-container">
+        <button class="btn btn-primary" onclick="inviaInDispensa()">Salva su Supabase</button>
+        <button class="btn btn-secondary" onclick="esportaInCSV()">Esporta in CSV</button>
+    </div>
+</div>
+
+<script>
+    // Configura qui le tue credenziali Supabase
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI3MTQ3MSwiZXhwIjoyMDk0ODQ3NDcxfQ.DAjgXTsXsam82wgJw9L1k1C-T37FHdmVZCOkeWjnuV0";
+    
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Calcolo automatico del totale riga
+    function calcolaTotale() {
+        const prezzo = parseFloat(document.getElementById('prezzo').value) || 0;
+        const quantita = parseInt(document.getElementById('quantita').value) || 0;
+        document.getElementById('totale_riga').value = (prezzo * quantita).toFixed(2);
+    }
+
+    // Estrae i dati inseriti nel form rispettando i nomi delle colonne richiesti
+    function ottieniDatiForm() {
+        return {
+            nome: document.getElementById('nome').value,
+            classe: document.getElementById('classe').value,
+            prezzo: parseFloat(document.getElementById('prezzo').value) || 0,
+            quantita: parseInt(document.getElementById('quantita').value) || 0,
+            totale_riga: parseFloat(document.getElementById('totale_riga').value) || 0,
+            acquisto: document.getElementById('acquisto').value,
+            scadenza: document.getElementById('scadenza').value
+        };
+    }
+
+    // Funzione 1: Esporta e salva i dati sul database Supabase
+    async function inviaInDispensa() {
+        const dati = ottieniDatiForm();
         
-        let supabaseClient = null;
+        if (!dati.nome) {
+            alert("Inserisci almeno il nome del prodotto!");
+            return;
+        }
 
-        let inventario = [];
-        let totaleEconomico = 0;
-        let categoriaSelezionata = "";
+        // Sostituisci 'inventario' con il nome reale della tua tabella su Supabase
+        const { data, error } = await supabase
+            .from('inventario') 
+            .insert([dati]);
 
-        const inputNome = document.getElementById('nomeProdotto');
-        const campoCategoria = document.getElementById('campoCategoria');
-        const inputPrezzo = document.getElementById('prezzoProdotto');
-        const inputQuantita = document.getElementById('quantitaProdotto');
-        const inputAcquisto = document.getElementById('dataAcquisto');
-        const inputScadenza = document.getElementById('dataScadenza');
+        if (error) {
+            console.error("Errore di inserimento:", error);
+            alert("Errore durante il salvataggio su Supabase.");
+        } else {
+            alert("Dati salvati correttamente su Supabase!");
+        }
+    }
+
+    // Funzione 2: Genera e scarica istantaneamente il file CSV
+    function esportaInCSV() {
+        const dati = ottieniDatiForm();
+
+        // Intestazioni della tabella richieste
+        const headers = ["nome", "classe", "prezzo", "quantita", "totale_riga", "acquisto", "scadenza"];
         
-        const btnAggiungi = document.getElementById('btnAggiungi');
-        const btnInviaServer = document.getElementById('btnInviaServer');
-        const btnEsportaCSV = document.getElementById('btnEsportaCSV');
-        const btnReset = document.getElementById('btnReset');
-        const corpoTabella = document.getElementById('corpoTabella');
-        const areaSpesa = document.getElementById('totaleSpesa');
-        const sezioneInventario = document.getElementById('sezioneInventario');
+        // Costruzione delle righe (usa il punto e virgola come separatore standard italiano per Excel)
+        const rigaValori = [
+            `"${dati.nome.replace(/"/g, '""')}"`,
+            `"${dati.classe.replace(/"/g, '""')}"`,
+            dati.prezzo,
+            dati.quantita,
+            dati.totale_riga,
+            dati.acquisto,
+            dati.scadenza
+        ];
 
-        const menuDinamico = document.getElementById('menuCategorie');
-        const btnChiudiMenu = document.getElementById('btnChiudiMenu');
-        const bottoniOpzione = document.querySelectorAll('.btn-opzione');
+        const contenutoCSV = [
+            headers.join(";"),
+            rigaValori.join(";")
+        ].join("\n");
 
-        function impostaDataOggi() {
-            const oggi = new Date();
-            const anno = oggi.getFullYear();
-            const mese = String(oggi.getMonth() + 1).padStart(2, '0');
-            const giorno = String(oggi.getDate()).padStart(2, '0');
-            inputAcquisto.value = anno + "-" + mese + "-" + giorno;
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            impostaDataOggi();
-
-            // Inizializzazione stabile della libreria cloud
-            if (typeof window.supabase !== 'undefined' && !SUPABASE_URL.includes("IL_TUO_PROJECT_URL")) {
-                try {
-                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                } catch(e) {
-                    console.error("Errore inizializzazione client:", e);
-                }
-            }
-
-            caricaDatiSito();
-        });
-
-        // Apertura Menu Categorie
-        campoCategoria.addEventListener('click', (e) => {
-            e.stopPropagation();
-            menuDinamico.classList.toggle('aperto');
-        });
-
-        function chiudiMenu() {
-            menuDinamico.classList.remove('aperto');
-        }
+        // Creazione del file blob e trigger del download automatico
+        const blob = new Blob([contenutoCSV], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
         
-        btnChiudiMenu.addEventListener('click', (e) => {
-            e.stopPropagation();
-            chiudiMenu();
-        });
+        link.setAttribute("href", url);
+        link.setAttribute("download", `esportazione_dispensa_${new Date().toISOString().slice(0,10)}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
 
-        document.addEventListener('click', chiudiMenu);
-        menuDinamico.addEventListener('click', (e) => { e.stopPropagation(); });
-
-        // Selezione categorie della lista
-        bottoniOpzione.forEach(bottone => {
-            bottone.addEventListener('click', (e) => {
-                categoriaSelezionata = e.target.getAttribute('data-valore');
-                campoCategoria.innerText = categoriaSelezionata;
-                campoCategoria.style.borderColor = "#cbd5e1";
-                chiudiMenu();
-            });
-        });
-
-        // Inserimento Prodotto
-        btnAggiungi.addEventListener('click', function() {
-            const nome = inputNome.value.trim();
-            const classe = categoriaSelezionata;
-            const prezzo = parseFloat(inputPrezzo.value);
-            const quantita = parseInt(inputQuantita.value);
-            const acquisto = inputAcquisto.value;
-            const scadenza = inputScadenza.value;
-
-            if (nome === "") { alert("Inserisci il nome del prodotto!"); return; }
-            if (classe === "") { alert("Seleziona una categoria!"); campoCategoria.style.borderColor = "#e53e3e"; return; }
-            if (isNaN(prezzo) || prezzo < 0) { alert("Inserisci un prezzo valido!"); return; }
-            if (isNaN(quantita) || quantita < 1) { alert("Inserisci una quantità valida!"); return; }
-            if (!acquisto) { alert("Seleziona la data di acquisto!"); return; }
-            if (!scadenza) { alert("Seleziona la data di scadenza!"); return; }
-
-            const costoRiga = prezzo * quantita;
-            const idProdotto = Date.now();
-
-            const nuovoProdotto = { 
-                id: idProdotto, 
-                nome: nome, 
-                classe: classe, 
-                prezzo: prezzo, 
-                quantita: quantita, 
-                costoRiga: costoRiga,
-                acquisto: acquisto, 
-                scadenza: scadenza 
-            };
-            inventario.push(nuovoProdotto);
-
-            salvaDatiSito();
-            renderizzaRigaTabella(nuovoProdotto);
-            aggiornaPrezzoTotale();
-
-            inputNome.value = "";
-            inputPrezzo.value = "";
-            inputQuantita.value = "1";
-            inputScadenza.value = "";
-            categoriaSelezionata = "";
-            campoCategoria.innerText = "Seleziona...";
-            impostaDataOggi();
-        });
-
-        function renderizzaRigaTabella(prodotto) {
-            sezioneInventario.style.display = "block";
-            const riga = `
-                <tr id="riga-${prodotto.id}">
-                    <td><b>${prodotto.nome}</b></td>
-                    <td>${prodotto.classe}</td>
-                    <td>€ ${prodotto.prezzo.toFixed(2)}</td>
-                    <td>${prodotto.quantita}</td>
-                    <td>€ ${prodotto.costoRiga.toFixed(2)}</td>
-                    <td>${formattaDataMostrata(prodotto.acquisto)}</td>
-                    <td>${formattaDataMostrata(prodotto.scadenza)}</td>
-                    <td><button class="btn-elimina" onclick="eliminaProdotto(${prodotto.id})">Elimina</button></td>
-                </tr>`;
-            corpoTabella.innerHTML += riga;
-        }
-
-        function aggiornaPrezzoTotale() {
-            totaleEconomico = inventario.reduce((somma, item) => somma + item.costoRiga, 0);
-            areaSpesa.innerText = totaleEconomico.toFixed(2);
-            
-            if (inventario.length === 0) {
-                sezioneInventario.style.display = "none";
-            }
-        }
-
-        // Funzione estetica per la tabella visiva (GG/MM/AAAA)
-        function formattaDataMostrata(dataStringa) {
-            if(!dataStringa) return "";
-            const pezzi = dataStringa.split('-');
-            if(pezzi.length !== 3) return dataStringa;
-            return pezzi[2] + "/" + pezzi[1] + "/" + pezzi[0];
-        }
-
-        window.eliminaProdotto = function(id) {
-            document.getElementById("riga-" + id).remove();
-            inventario = inventario.filter(item => item.id !== id);
-
-            salvaDatiSito();
-            aggiornaPrezzoTotale();
-        }
-
-        function salvaDatiSito() {
-            localStorage.setItem('inventarioSpesa_LocalStorage', JSON.stringify(inventario));
-        }
-
-        function caricaDatiSito() {
-            const datiSalvati = localStorage.getItem('inventarioSpesa_LocalStorage');
-            if (datiSalvati) {
-                inventario = JSON.parse(datiSalvati);
-                inventario.forEach(item => {
-                    renderizzaRigaTabella(item);
-                });
-                aggiornaPrezzoTotale();
-            }
-        }
-
-        btnReset.addEventListener('click', function() {
-            const conferma = confirm("Vuoi davvero svuotare tutto l'inventario locale? I dati inseriti andranno persi.");
-            if (conferma) {
-                localStorage.removeItem('inventarioSpesa_LocalStorage');
-                inventario = [];
-                corpoTabella.innerHTML = "";
-                aggiornaPrezzoTotale();
-            }
-        });
-
-        // MODIFICATO: Generazione del file CSV con le esatte intestazioni strutturate richieste
-        btnEsportaCSV.addEventListener('click', function() {
-            if (inventario.length === 0) {
-                alert("Non ci sono prodotti da esportare!");
-                return;
-            }
-
-            // Intestazione richiesta: nome;classe;prezzo;quantita;totale_riga;acquisto;scadenza
-            let contenutoCSV = "nome;classe;prezzo;quantita;totale_riga;acquisto;scadenza\n";
-
-            // Popolamento dei dati mantenendo la struttura formale originaria YYYY-MM-DD per le date
-            inventario.forEach(item => {
-                contenutoCSV += `${item.nome};${item.classe};${item.prezzo.toFixed(2)};${item.quantita};${item.costoRiga.toFixed(2)};${item.acquisto};${item.scadenza}\n`;
-            });
-
-            // Generiamo il download con BOM per Excel
-            const blob = new Blob(["\uFEFF" + contenutoCSV], { type: 'text/csv;charset=utf-8;' });
-            const linkDownload = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            linkDownload.setAttribute("href", url);
-            linkDownload.setAttribute("download", "inventario_dispensa.csv");
-            linkDownload.style.visibility = 'hidden';
-            
-            document.body.appendChild(linkDownload);
-            linkDownload.click();
-            document.body.removeChild(linkDownload);
-        });
-
-        // Invio dei dati a Supabase Cloud
-        btnInviaServer.addEventListener('click', async function() {
-            if (inventario.length === 0) {
-                alert("Non ci sono prodotti da salvare sul database remoto!");
-                return;
-            }
-
-            // SIMULAZIONE DI TEST SE LE CHIAVI NON SONO CONFIGURATE
-            if (!supabaseClient || SUPABASE_URL.includes("IL_TUO_PROJECT_URL")) {
-                alert("MODALITÀ DI TEST LOCALE:\n\nLe credenziali di Supabase non sono ancora state inserite. La GUI simula un salvataggio riuscito e svuota la lista.\n(Usa il tasto 'Esporta in CSV' per salvare i file sul PC!)");
-                localStorage.removeItem('inventarioSpesa_LocalStorage');
-                inventario = [];
-                corpoTabella.innerHTML = "";
-                aggiornaPrezzoTotale();
-                return;
-            }
-
-            btnInviaServer.disabled = true;
-            btnInviaServer.innerText = "Salvataggio cloud in corso...";
-
-            const datiDaInviare = inventario.map(item => ({
-                nome: item.nome,
-                classe: item.classe,
-                prezzo: parseFloat(item.prezzo),
-                quantita: parseInt(item.quantita),
-                acquisto: item.acquisto, 
-                scadenza: item.scadenza 
-            }));
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('prodotti')
-                    .insert(datiDaInviare)
-                    .select();
-
-                if (error) {
-                    throw error;
-                }
-
-                alert("Fantastico! Tutti i dati sono stati registrati con successo nel database cloud.");
-                
-                localStorage.removeItem('inventarioSpesa_LocalStorage');
-                inventario = [];
-                corpoTabella.innerHTML = "";
-                aggiornaPrezzoTotale();
-
-            } catch (err) {
-                console.error("Dettaglio Errore Server:", err);
-                
-                let messaggioDettagliato = "Errore di comunicazione col Server Cloud:\n\n";
-                if (err.message) messaggioDettagliato += "Messaggio: " + err.message + "\n";
-                if (err.code) messaggioDettagliato += "Codice Errore: " + err.code + "\n";
-                if (err.details) messaggioDettagliato += "Dettagli: " + err.details + "\n";
-                if (err.hint) messaggioDettagliato += "Suggerimento: " + err.hint + "\n";
-                
-                alert(messaggioDettagliato);
-            } finally {
-                btnInviaServer.disabled = false;
-                btnInviaServer.innerText = "Salva sul Database Cloud";
-            }
-        });
-    </script>
 </body>
 </html>
 
