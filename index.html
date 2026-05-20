@@ -208,6 +208,12 @@
         .btn-server:hover { background-color: #27ae60; }
         .btn-server:disabled { background-color: #a0aec0; cursor: not-allowed; }
 
+        /* NUOVO STILE: Colore azzurro-ghiaccio per il bottone CSV locale */
+        .btn-csv {
+            background-color: #17a2b8;
+        }
+        .btn-csv:hover { background-color: #138496; }
+
         .btn-reset { background-color: #e53e3e; }
         .btn-reset:hover { background-color: #c53030; }
 
@@ -334,7 +340,9 @@
         <!-- SEZIONE TABELLA INVENTARIO -->
         <div id="sezioneInventario" style="display: none;">
             <div class="action-buttons">
+                <!-- MODIFICATO: Aggiunto pulsante esportazione CSV locale -->
                 <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
+                <button class="btn btn-csv" id="btnEsportaCSV">Esporta in CSV (Excel)</button>
                 <button class="btn btn-reset" id="btnReset">Svuota Dispensa</button>
             </div>
             
@@ -362,15 +370,11 @@
 
     <!-- LOGICA JAVASCRIPT -->
     <script>
-        // Sostituisci qui dentro le stringhe con i tuoi dati reali presi da Supabase
-        const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzE0NzEsImV4cCI6MjA5NDg0NzQ3MX0.83Vn6ji8exk_zesh0kiJjBTZsNFjHewHRqKyy6N7xl8";
+        // CONFIGURAZIONE CHIAVI DI SUPABASE
+        const SUPABASE_URL = "https://IL_TUO_PROJECT_URL.supabase.co";
+        const SUPABASE_KEY = "LA_TUA_ANON_PUBLIC_KEY";
         
-        // Inizializzazione sicura del client Supabase
         let supabaseClient = null;
-        if (typeof window.supabase !== 'undefined') {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -385,6 +389,7 @@
         
         const btnAggiungi = document.getElementById('btnAggiungi');
         const btnInviaServer = document.getElementById('btnInviaServer');
+        const btnEsportaCSV = document.getElementById('btnEsportaCSV');
         const btnReset = document.getElementById('btnReset');
         const corpoTabella = document.getElementById('corpoTabella');
         const areaSpesa = document.getElementById('totaleSpesa');
@@ -394,17 +399,30 @@
         const btnChiudiMenu = document.getElementById('btnChiudiMenu');
         const bottoniOpzione = document.querySelectorAll('.btn-opzione');
 
-        window.addEventListener('DOMContentLoaded', () => {
+        function impostaDataOggi() {
             const oggi = new Date();
             const anno = oggi.getFullYear();
             const mese = String(oggi.getMonth() + 1).padStart(2, '0');
             const giorno = String(oggi.getDate()).padStart(2, '0');
-            
-            inputAcquisto.value = `${anno}-${mese}-${giorno}`;
+            inputAcquisto.value = anno + "-" + mese + "-" + giorno;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            impostaDataOggi();
+
+            // Inizializzazione controllata del client Supabase
+            if (typeof window.supabase !== 'undefined' && !SUPABASE_URL.includes("IL_TUO_PROJECT_URL")) {
+                try {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                } catch(e) {
+                    console.error("Errore inizializzazione client:", e);
+                }
+            }
+
             caricaDatiSito();
         });
 
-        // Gestione Menu Categorie (Apertura)
+        // Apertura Menu Categorie
         campoCategoria.addEventListener('click', (e) => {
             e.stopPropagation();
             menuDinamico.classList.toggle('aperto');
@@ -422,7 +440,7 @@
         document.addEventListener('click', chiudiMenu);
         menuDinamico.addEventListener('click', (e) => { e.stopPropagation(); });
 
-        // Gestione selezione opzioni laterali
+        // Selezione categorie della lista
         bottoniOpzione.forEach(bottone => {
             bottone.addEventListener('click', (e) => {
                 categoriaSelezionata = e.target.getAttribute('data-valore');
@@ -432,7 +450,7 @@
             });
         });
 
-        // Azione: Aggiunta Prodotto Locale
+        // Inserimento Prodotto
         btnAggiungi.addEventListener('click', function() {
             const nome = inputNome.value.trim();
             const classe = categoriaSelezionata;
@@ -467,13 +485,13 @@
             renderizzaRigaTabella(nuovoProdotto);
             aggiornaPrezzoTotale();
 
-            // Pulisce i campi di inserimento
             inputNome.value = "";
             inputPrezzo.value = "";
             inputQuantita.value = "1";
             inputScadenza.value = "";
             categoriaSelezionata = "";
             campoCategoria.innerText = "Seleziona...";
+            impostaDataOggi();
         });
 
         function renderizzaRigaTabella(prodotto) {
@@ -505,11 +523,11 @@
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
             if(parti.length !== 3) return dataStringa;
-            return `${parti[2]}/${parti[1]}/${parti[0]}`;
+            return parti[2] + "/" + parti[1] + "/" + parti[0];
         }
 
         window.eliminaProdotto = function(id) {
-            document.getElementById(`riga-${id}`).remove();
+            document.getElementById("riga-" + id).remove();
             inventario = inventario.filter(item => item.id !== id);
 
             salvaDatiSito();
@@ -541,14 +559,49 @@
             }
         });
 
-        // Invio via API al database cloud (CORRETTO SENZA RIFERIMENTI CSV)
-        btnInviaServer.addEventListener('click', async function() {
-            if (SUPABASE_URL === "https://IL_TUO_PROJECT_URL.supabase.co") {
-                alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
+        // NUOVA FUNZIONE: Esportazione di un file CSV locale compatibile con Excel
+        btnEsportaCSV.addEventListener('click', function() {
+            if (inventario.length === 0) {
+                alert("Non ci sono prodotti da esportare!");
                 return;
             }
+
+            // Intestazione colonne
+            let contenutoCSV = "Prodotto;Categoria;Prezzo Unitario (€);Quantita;Totale Riga (€);Data Acquisto;Data Scadenza\n";
+
+            // Popoliamo le righe leggendo l'array
+            inventario.forEach(item => {
+                contenutoCSV += `${item.nome};${item.classe};${item.prezzo.toFixed(2)};${item.quantita};${item.costoRiga.toFixed(2)};${formattaData(item.acquisto)};${formattaData(item.scadenza)}\n`;
+            });
+
+            // Generiamo il download virtuale con BOM per gli accenti di Excel
+            const blob = new Blob(["\uFEFF" + contenutoCSV], { type: 'text/csv;charset=utf-8;' });
+            const linkDownload = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            linkDownload.setAttribute("href", url);
+            linkDownload.setAttribute("download", "inventario_dispensa.csv");
+            linkDownload.style.visibility = 'hidden';
+            
+            document.body.appendChild(linkDownload);
+            linkDownload.click();
+            document.body.removeChild(linkDownload);
+        });
+
+        // Invio dei dati al database cloud
+        btnInviaServer.addEventListener('click', async function() {
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da salvare sul database remoto!");
+                return;
+            }
+
+            // SIMULAZIONE DI TEST SE LE CHIAVI NON SONO CONFIGURATE
+            if (!supabaseClient || SUPABASE_URL.includes("IL_TUO_PROJECT_URL")) {
+                alert("MODALITÀ DI TEST LOCALE:\n\nLe credenziali di Supabase non sono ancora state inserite. La GUI simula un salvataggio riuscito e svuota la lista.\n(Puoi comunque usare il tasto 'Esporta in CSV' per salvare i file sul PC!)");
+                localStorage.removeItem('inventarioSpesa_LocalStorage');
+                inventario = [];
+                corpoTabella.innerHTML = "";
+                aggiornaPrezzoTotale();
                 return;
             }
 
@@ -558,18 +611,21 @@
             const datiDaInviare = inventario.map(item => ({
                 nome: item.nome,
                 classe: item.classe,
-                prezzo: item.prezzo,
-                quantita: item.quantita,
-                acquisto: item.acquisto,
-                scadenza: item.scadenza
+                prezzo: parseFloat(item.prezzo),
+                quantita: parseInt(item.quantita),
+                acquisto: item.acquisto, 
+                scadenza: item.scadenza 
             }));
 
             try {
                 const { data, error } = await supabaseClient
                     .from('prodotti')
-                    .insert(datiDaInviare);
+                    .insert(datiDaInviare)
+                    .select();
 
-                if (error) throw error;
+                if (error) {
+                    throw error;
+                }
 
                 alert("Fantastico! Tutti i dati sono stati registrati con successo nel database cloud.");
                 
@@ -580,7 +636,14 @@
 
             } catch (err) {
                 console.error("Dettaglio Errore Server:", err);
-                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la console del browser o i permessi della tabella prodotti su Supabase.");
+                
+                let messaggioDettagliato = "Errore di comunicazione col Server Cloud:\n\n";
+                if (err.message) messaggioDettagliato += "Messaggio: " + err.message + "\n";
+                if (err.code) messaggioDettagliato += "Codice Errore: " + err.code + "\n";
+                if (err.details) messaggioDettagliato += "Dettagli: " + err.details + "\n";
+                if (err.hint) messaggioDettagliato += "Suggerimento: " + err.hint + "\n";
+                
+                alert(messaggioDettagliato);
             } finally {
                 btnInviaServer.disabled = false;
                 btnInviaServer.innerText = "Salva sul Database Cloud";
