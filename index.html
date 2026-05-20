@@ -362,12 +362,12 @@
 
     <!-- LOGICA JAVASCRIPT -->
     <script>
-        // Sostituisci qui dentro le stringhe con i tuoi dati reali presi da Supabase
+        // SOSTITUISCI QUI DENTRO LE TUE CHIAVI REALI DI SUPABASE
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzE0NzEsImV4cCI6MjA5NDg0NzQ3MX0.83Vn6ji8exk_zesh0kiJjBTZsNFjHewHRqKyy6N7xl8";
         
-        // Definiamo la variabile globale del client
-        let supabaseClient = null;
+        // Il client viene inizializzato direttamente all'avvio dello script
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -398,12 +398,6 @@
             const giorno = String(oggi.getDate()).padStart(2, '0');
             
             inputAcquisto.value = `${anno}-${mese}-${giorno}`;
-
-            // RISOLTO: Inizializzazione diretta senza condizioni restrittive bloccanti
-            if (typeof window.supabase !== 'undefined') {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-
             caricaDatiSito();
         });
 
@@ -508,7 +502,7 @@
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
             if(parti.length !== 3) return dataStringa;
-            return `${parti[2]}/${parti[1]}/${parti[0]}`; // RISOLTO: Riordinati gli indici dell'array per produrre GG/MM/AAAA corretto
+            return `${parti}/${parti}/${parti}`;
         }
 
         window.eliminaProdotto = function(id) {
@@ -544,13 +538,8 @@
             }
         });
 
-        // Invio via API al database cloud
+        // Invio via API al database cloud (CONTROLLI STRUTTURALI RIMOSSI)
         btnInviaServer.addEventListener('click', async function() {
-            // RISOLTO: Controllo dinamico basato sulla stringa originaria di esempio
-            if (SUPABASE_URL.includes("IL_TUO_PROJECT_URL") || !supabaseClient) {
-                alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
-                return;
-            }
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da salvare sul database remoto!");
                 return;
@@ -569,6 +558,7 @@
             }));
 
             try {
+                // Invia i dati direttamente al client inizializzato in cima
                 const { data, error } = await supabaseClient
                     .from('prodotti')
                     .insert(datiDaInviare)
@@ -603,4 +593,5 @@
     </script>
 </body>
 </html>
+
 
