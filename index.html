@@ -331,7 +331,7 @@
             Totale Spesa Corrente: € <span id="totaleSpesa">0.00</span>
         </div>
 
-        <!-- SEZIONE TABELLA INVENTARIO (Risolto refuso ID) -->
+        <!-- SEZIONE TABELLA INVENTARIO -->
         <div id="sezioneInventario" style="display: none;">
             <div class="action-buttons">
                 <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
@@ -366,12 +366,14 @@
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "sb_secret_Txo7A-VvGOqUAZ1sPyujOg_s4bLMFmo";
         
-        // Inizializzazione sicura del client
-        let supabaseClient;
-        try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        } catch(e) {
-            console.log("Supabase non inizializzato con chiavi reali.");
+        // Inizializzazione sicura e condizionale del client Supabase
+        let supabaseClient = null;
+        if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== "https://IL_TUO_PROJECT_URL.supabase.co") {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } catch(e) {
+                console.error("Errore inizializzazione Supabase:", e);
+            }
         }
 
         let inventario = [];
@@ -469,7 +471,7 @@
             renderizzaRigaTabella(nuovoProdotto);
             aggiornaPrezzoTotale();
 
-            // Pulisce i campi di input
+            // Pulisce i campi di inserimento
             inputNome.value = "";
             inputPrezzo.value = "";
             inputQuantita.value = "1";
@@ -506,7 +508,8 @@
         function formattaData(dataStringa) {
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
-            return `${parti[2]}/${parti[1]}/${parti[0]}`; // Risolto ordine di visualizzazione GG/MM/AAAA
+            if(parti.length !== 3) return dataStringa;
+            return `${parti[2]}/${parti[1]}/${parti[0]}`;
         }
 
         window.eliminaProdotto = function(id) {
@@ -542,10 +545,10 @@
             }
         });
 
-        // Invio via API al database
+        // Invio via API al database cloud
         btnInviaServer.addEventListener('click', async function() {
             if (!supabaseClient) {
-                alert("Configura prima l'URL e la KEY di Supabase in cima allo script!");
+                alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
                 return;
             }
             if (inventario.length === 0) {
@@ -581,7 +584,7 @@
 
             } catch (err) {
                 console.error("Dettaglio Errore Server:", err);
-                alert("Impossibile salvare i dati. Nota: l'errore è normale se non hai ancora inserito il tuo URL e la tua KEY reali di Supabase in cima al codice.");
+                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la console del browser.");
             } finally {
                 btnInviaServer.disabled = false;
                 btnInviaServer.innerText = "Salva sul Database Cloud";
