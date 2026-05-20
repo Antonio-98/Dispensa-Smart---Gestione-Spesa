@@ -362,12 +362,15 @@
 
     <!-- LOGICA JAVASCRIPT -->
     <script>
-        // SOSTITUISCI QUI DENTRO LE TUE CHIAVI REALI DI SUPABASE
+        // Sostituisci qui dentro le stringhe con i tuoi dati reali presi da Supabase
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yc2t2ZWpwaGtpaGpxYmxydXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzE0NzEsImV4cCI6MjA5NDg0NzQ3MX0.83Vn6ji8exk_zesh0kiJjBTZsNFjHewHRqKyy6N7xl8";
         
-        // Il client viene inizializzato direttamente all'avvio dello script
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inizializzazione sicura del client Supabase
+        let supabaseClient = null;
+        if (typeof window.supabase !== 'undefined') {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -502,7 +505,7 @@
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
             if(parti.length !== 3) return dataStringa;
-            return `${parti}/${parti}/${parti}`;
+            return `${parti[2]}/${parti[1]}/${parti[0]}`;
         }
 
         window.eliminaProdotto = function(id) {
@@ -538,8 +541,12 @@
             }
         });
 
-        // Invio via API al database cloud (CONTROLLI STRUTTURALI RIMOSSI)
+        // Invio via API al database cloud (CORRETTO SENZA RIFERIMENTI CSV)
         btnInviaServer.addEventListener('click', async function() {
+            if (SUPABASE_URL === "https://IL_TUO_PROJECT_URL.supabase.co") {
+                alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
+                return;
+            }
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da salvare sul database remoto!");
                 return;
@@ -551,22 +558,18 @@
             const datiDaInviare = inventario.map(item => ({
                 nome: item.nome,
                 classe: item.classe,
-                prezzo: parseFloat(item.prezzo),
-                quantita: parseInt(item.quantita),
-                acquisto: item.acquisto, 
-                scadenza: item.scadenza 
+                prezzo: item.prezzo,
+                quantita: item.quantita,
+                acquisto: item.acquisto,
+                scadenza: item.scadenza
             }));
 
             try {
-                // Invia i dati direttamente al client inizializzato in cima
                 const { data, error } = await supabaseClient
                     .from('prodotti')
-                    .insert(datiDaInviare)
-                    .select();
+                    .insert(datiDaInviare);
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 alert("Fantastico! Tutti i dati sono stati registrati con successo nel database cloud.");
                 
@@ -577,14 +580,7 @@
 
             } catch (err) {
                 console.error("Dettaglio Errore Server:", err);
-                
-                let messaggioDettagliato = "Errore di comunicazione col Server Cloud:\n\n";
-                if (err.message) messaggioDettagliato += "Messaggio: " + err.message + "\n";
-                if (err.code) messaggioDettagliato += "Codice Errore: " + err.code + "\n";
-                if (err.details) messaggioDettagliato += "Dettagli: " + err.details + "\n";
-                if (err.hint) messaggioDettagliato += "Suggerimento: " + err.hint + "\n";
-                
-                alert(messaggioDettagliato);
+                alert("Si è verificato un errore durante la comunicazione con il server. Controlla la console del browser o i permessi della tabella prodotti su Supabase.");
             } finally {
                 btnInviaServer.disabled = false;
                 btnInviaServer.innerText = "Salva sul Database Cloud";
@@ -593,5 +589,4 @@
     </script>
 </body>
 </html>
-
 
