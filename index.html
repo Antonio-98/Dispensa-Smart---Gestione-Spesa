@@ -208,7 +208,7 @@
         .btn-server:hover { background-color: #27ae60; }
         .btn-server:disabled { background-color: #a0aec0; cursor: not-allowed; }
 
-        /* NUOVO STILE: Colore azzurro-ghiaccio per il bottone CSV locale */
+        /* Stile azzurro per il bottone CSV locale richiesto */
         .btn-csv {
             background-color: #17a2b8;
         }
@@ -340,7 +340,7 @@
         <!-- SEZIONE TABELLA INVENTARIO -->
         <div id="sezioneInventario" style="display: none;">
             <div class="action-buttons">
-                <!-- MODIFICATO: Aggiunto pulsante esportazione CSV locale -->
+                <!-- AGGIUNTO: Gruppo bottoni con Cloud, il nuovo CSV e Reset -->
                 <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
                 <button class="btn btn-csv" id="btnEsportaCSV">Esporta in CSV (Excel)</button>
                 <button class="btn btn-reset" id="btnReset">Svuota Dispensa</button>
@@ -410,7 +410,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             impostaDataOggi();
 
-            // Inizializzazione controllata del client Supabase
+            // Inizializzazione stabile della libreria cloud
             if (typeof window.supabase !== 'undefined' && !SUPABASE_URL.includes("IL_TUO_PROJECT_URL")) {
                 try {
                     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -503,8 +503,8 @@
                     <td>€ ${prodotto.prezzo.toFixed(2)}</td>
                     <td>${prodotto.quantita}</td>
                     <td>€ ${prodotto.costoRiga.toFixed(2)}</td>
-                    <td>${formattaData(prodotto.acquisto)}</td>
-                    <td>${formattaData(prodotto.scadenza)}</td>
+                    <td>${formattaDataMostrata(prodotto.acquisto)}</td>
+                    <td>${formattaDataMostrata(prodotto.scadenza)}</td>
                     <td><button class="btn-elimina" onclick="eliminaProdotto(${prodotto.id})">Elimina</button></td>
                 </tr>`;
             corpoTabella.innerHTML += riga;
@@ -519,11 +519,12 @@
             }
         }
 
-        function formattaData(dataStringa) {
+        // Funzione estetica per la tabella visiva (GG/MM/AAAA)
+        function formattaDataMostrata(dataStringa) {
             if(!dataStringa) return "";
-            const parti = dataStringa.split('-');
-            if(parti.length !== 3) return dataStringa;
-            return parti[2] + "/" + parti[1] + "/" + parti[0];
+            const pezzi = dataStringa.split('-');
+            if(pezzi.length !== 3) return dataStringa;
+            return pezzi[2] + "/" + pezzi[1] + "/" + pezzi[0];
         }
 
         window.eliminaProdotto = function(id) {
@@ -559,22 +560,22 @@
             }
         });
 
-        // NUOVA FUNZIONE: Esportazione di un file CSV locale compatibile con Excel
+        // MODIFICATO: Generazione del file CSV con le esatte intestazioni strutturate richieste
         btnEsportaCSV.addEventListener('click', function() {
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da esportare!");
                 return;
             }
 
-            // Intestazione colonne
+            // Intestazione richiesta: nome;classe;prezzo;quantita;totale_riga;acquisto;scadenza
             let contenutoCSV = "nome;classe;prezzo;quantita;totale_riga;acquisto;scadenza\n";
 
-            // Popoliamo le righe leggendo l'array
+            // Popolamento dei dati mantenendo la struttura formale originaria YYYY-MM-DD per le date
             inventario.forEach(item => {
-                contenutoCSV += `${item.nome};${item.classe};${item.prezzo.toFixed(2)};${item.quantita};${item.costoRiga.toFixed(2)};${formattaData(item.acquisto)};${formattaData(item.scadenza)}\n`;
+                contenutoCSV += `${item.nome};${item.classe};${item.prezzo.toFixed(2)};${item.quantita};${item.costoRiga.toFixed(2)};${item.acquisto};${item.scadenza}\n`;
             });
 
-            // Generiamo il download virtuale con BOM per gli accenti di Excel
+            // Generiamo il download con BOM per Excel
             const blob = new Blob(["\uFEFF" + contenutoCSV], { type: 'text/csv;charset=utf-8;' });
             const linkDownload = document.createElement("a");
             const url = URL.createObjectURL(blob);
@@ -588,7 +589,7 @@
             document.body.removeChild(linkDownload);
         });
 
-        // Invio dei dati al database cloud
+        // Invio dei dati a Supabase Cloud
         btnInviaServer.addEventListener('click', async function() {
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da salvare sul database remoto!");
@@ -597,7 +598,7 @@
 
             // SIMULAZIONE DI TEST SE LE CHIAVI NON SONO CONFIGURATE
             if (!supabaseClient || SUPABASE_URL.includes("IL_TUO_PROJECT_URL")) {
-                alert("MODALITÀ DI TEST LOCALE:\n\nLe credenziali di Supabase non sono ancora state inserite. La GUI simula un salvataggio riuscito e svuota la lista.\n(Puoi comunque usare il tasto 'Esporta in CSV' per salvare i file sul PC!)");
+                alert("MODALITÀ DI TEST LOCALE:\n\nLe credenziali di Supabase non sono ancora state inserite. La GUI simula un salvataggio riuscito e svuota la lista.\n(Usa il tasto 'Esporta in CSV' per salvare i file sul PC!)");
                 localStorage.removeItem('inventarioSpesa_LocalStorage');
                 inventario = [];
                 corpoTabella.innerHTML = "";
