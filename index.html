@@ -617,54 +617,59 @@
     });
 
     // EXPORT CSV
-    btnExportCSV.addEventListener('click', () => {
+btnExportCSV.addEventListener('click', () => {
 
-        if (inventario.length === 0) {
+    if (inventario.length === 0) {
 
-            alert("Nessun dato da esportare!");
+        alert("Nessun dato da esportare!");
 
-            return;
+        return;
 
-        }
+    }
 
-        let csv =
-            "Nome,Categoria,Prezzo,Quantita,Totale,Acquisto,Scadenza\n";
+    // Export CSV
+    let csv =
+        "nome;classe;prezzo;quantita;totale_riga;acquisto;scadenza\n";
 
-        inventario.forEach(item => {
+    // Righe dati
+    inventario.forEach(item => {
 
-            csv += `"${item.nome}",`;
-            csv += `"${item.classe}",`;
-            csv += `"${item.prezzo}",`;
-            csv += `"${item.quantita}",`;
-            csv += `"${item.costoRiga}",`;
-            csv += `"${item.acquisto}",`;
-            csv += `"${item.scadenza}"\n`;
-
-        });
-
-        const blob = new Blob(
-            [csv],
-            { type: 'text/csv;charset=utf-8;' }
-        );
-
-        const link = document.createElement("a");
-
-        const url = URL.createObjectURL(blob);
-
-        link.setAttribute("href", url);
-
-        link.setAttribute(
-            "download",
-            `inventario_${Date.now()}.csv`
-        );
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        document.body.removeChild(link);
+        csv += `${item.nome};`;
+        csv += `${item.classe};`;
+        csv += `${item.prezzo.toFixed(2)};`;
+        csv += `${item.quantita};`;
+        csv += `${item.costoRiga.toFixed(2)};`;
+        csv += `${item.acquisto};`;
+        csv += `${item.scadenza}\n`;
 
     });
+
+    // UTF-8 BOM per Excel
+    const csvContent = "\uFEFF" + csv;
+
+    const blob = new Blob(
+        [csvContent],
+        { type: 'text/csv;charset=utf-8;' }
+    );
+
+    const link = document.createElement("a");
+
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute("href", url);
+
+    link.setAttribute(
+        "download",
+        `inventario_${Date.now()}.csv`
+    );
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+});
 
     // SALVATAGGIO SUPABASE
     btnInviaServer.addEventListener('click', async () => {
