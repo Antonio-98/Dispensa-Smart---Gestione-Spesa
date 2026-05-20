@@ -399,8 +399,8 @@
             
             inputAcquisto.value = `${anno}-${mese}-${giorno}`;
 
-            // Inizializzazione stabile del client Supabase
-            if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== "https://IL_TUO_PROJECT_URL.supabase.co") {
+            // RISOLTO: Inizializzazione diretta senza condizioni restrittive bloccanti
+            if (typeof window.supabase !== 'undefined') {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             }
 
@@ -508,7 +508,7 @@
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
             if(parti.length !== 3) return dataStringa;
-            return `${parti[2]}/${parti[1]}/${parti[0]}`; // Modificato l'ordine degli indici per GG/MM/AAAA corretto
+            return `${parti[2]}/${parti[1]}/${parti[0]}`; // RISOLTO: Riordinati gli indici dell'array per produrre GG/MM/AAAA corretto
         }
 
         window.eliminaProdotto = function(id) {
@@ -546,7 +546,8 @@
 
         // Invio via API al database cloud
         btnInviaServer.addEventListener('click', async function() {
-            if (!supabaseClient) {
+            // RISOLTO: Controllo dinamico basato sulla stringa originaria di esempio
+            if (SUPABASE_URL.includes("IL_TUO_PROJECT_URL") || !supabaseClient) {
                 alert("Per effettuare il salvataggio remoto devi prima configurare le tue credenziali reali di Supabase (URL e KEY) all'interno del codice JavaScript.");
                 return;
             }
@@ -558,7 +559,6 @@
             btnInviaServer.disabled = true;
             btnInviaServer.innerText = "Salvataggio cloud in corso...";
 
-            // Mappatura sicura: mantiene il formato originario YYYY-MM-DD per il database PostgreSQL
             const datiDaInviare = inventario.map(item => ({
                 nome: item.nome,
                 classe: item.classe,
