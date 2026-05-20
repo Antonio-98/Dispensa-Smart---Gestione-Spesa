@@ -5,7 +5,7 @@
     <title>Dispensa Smart - Gestione Inventario Casa</title>
     
     <!-- INCLUSIONE DELLA LIBRERIA CLIENT UFFICIALE DI SUPABASE VIA CDN -->
-    <script src="https://jsdelivr.net"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         /* Stili Generali */
@@ -202,7 +202,6 @@
             margin-bottom: 15px;
         }
 
-        /* Colore blu per indicare l'azione cloud sul server */
         .btn-server {
             background-color: #2ecc71;
         }
@@ -333,9 +332,8 @@
         </div>
 
         <!-- SEZIONE TABELLA INVENTARIO -->
-        <div id="sezenieInventario" style="display: none;">
+        <div id="sezioneInventario" style="display: none;">
             <div class="action-buttons">
-                <!-- MODIFICATO: Pulsante per inviare dati al database server invece del file CSV -->
                 <button class="btn btn-server" id="btnInviaServer">Salva sul Database Cloud</button>
                 <button class="btn btn-reset" id="btnReset">Svuota Dispensa</button>
             </div>
@@ -368,8 +366,8 @@
         const SUPABASE_URL = "https://orskvejphkihjqblruvx.supabase.co/rest/v1/";
         const SUPABASE_KEY = "sb_secret_Txo7A-VvGOqUAZ1sPyujOg_s4bLMFmo";
         
-        // Inizializza il client Supabase globale
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Estrazione e inizializzazione del client globale in modo sicuro per CDN
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let inventario = [];
         let totaleEconomico = 0;
@@ -387,7 +385,7 @@
         const btnReset = document.getElementById('btnReset');
         const corpoTabella = document.getElementById('corpoTabella');
         const areaSpesa = document.getElementById('totaleSpesa');
-        const sezioneInventario = document.getElementById('sezenieInventario');
+        const sezioneInventario = document.getElementById('sezioneInventario');
 
         const menuDinamico = document.getElementById('menuCategorie');
         const btnChiudiMenu = document.getElementById('btnChiudiMenu');
@@ -403,7 +401,7 @@
             caricaDatiSito();
         });
 
-        // Gestione Menu Categorie
+        // Gestione Menu Categorie (Apertura al clic sul finto input)
         campoCategoria.addEventListener('click', (e) => {
             e.stopPropagation();
             menuDinamico.classList.toggle('aperto');
@@ -412,6 +410,7 @@
         function chiudiMenu() {
             menuDinamico.classList.remove('aperto');
         }
+        
         btnChiudiMenu.addEventListener('click', (e) => {
             e.stopPropagation();
             chiudiMenu();
@@ -420,6 +419,7 @@
         document.addEventListener('click', chiudiMenu);
         menuDinamico.addEventListener('click', (e) => { e.stopPropagation(); });
 
+        // Gestione selezione opzioni laterali
         bottoniOpzione.forEach(bottone => {
             bottone.addEventListener('click', (e) => {
                 categoriaSelezionata = e.target.getAttribute('data-valore');
@@ -443,7 +443,7 @@
             if (isNaN(prezzo) || prezzo < 0) { alert("Inserisci un prezzo valido!"); return; }
             if (isNaN(quantita) || quantita < 1) { alert("Inserisci una quantità valida!"); return; }
             if (!acquisto) { alert("Seleziona la data di acquisto!"); return; }
-            if (!scadenza) { alert("Seleziona la data di scarsa!"); return; }
+            if (!scadenza) { alert("Seleziona la data di scadenza!"); return; }
 
             const costoRiga = prezzo * quantita;
             const idProdotto = Date.now();
@@ -464,6 +464,7 @@
             renderizzaRigaTabella(nuovoProdotto);
             aggiornaPrezzoTotale();
 
+            // Pulisce i campi
             inputNome.value = "";
             inputPrezzo.value = "";
             inputQuantita.value = "1";
@@ -500,7 +501,7 @@
         function formattaData(dataStringa) {
             if(!dataStringa) return "";
             const parti = dataStringa.split('-');
-            return `${parti}/${parti}/${parti}`;
+            return `${parti[2]}/${parti[1]}/${parti[0]}`; // Corretto l'ordine in GG/MM/AAAA
         }
 
         window.eliminaProdotto = function(id) {
@@ -536,18 +537,16 @@
             }
         });
 
-        // MODIFICA PRINCIPALE: Invio asincrono via API di Supabase al server remoto
+        // Invio asincrono via API di Supabase al server remoto
         btnInviaServer.addEventListener('click', async function() {
             if (inventario.length === 0) {
                 alert("Non ci sono prodotti da salvare sul database remoto!");
                 return;
             }
 
-            // Cambiamo lo stato visivo del pulsante per evitare clic ripetuti
             btnInviaServer.disabled = true;
             btnInviaServer.innerText = "Salvataggio cloud in corso...";
 
-            // Mappiamo l'array locale adattando le proprietà ai nomi delle colonne del DB
             const datiDaInviare = inventario.map(item => ({
                 nome: item.nome,
                 classe: item.classe,
@@ -558,16 +557,15 @@
             }));
 
             try {
-                // Esegue una richiesta HTTP POST strutturata alla tabella 'prodotti' [3]
-                const { data, error } = await supabase
+                // Utilizza l'istanza corretta supabaseClient
+                const { data, error } = await supabaseClient
                     .from('prodotti')
                     .insert(datiDaInviare);
 
-                if (error) throw error; // Se il server risponde con un errore, interrompe ed entra nel blocco catch
+                if (error) throw error;
 
                 alert("Fantastico! Tutti i dati sono stati registrati con successo nel database cloud.");
                 
-                // Pulisce l'inventario corrente locale dopo il corretto caricamento sul server
                 localStorage.removeItem('inventarioSpesa_LocalStorage');
                 inventario = [];
                 corpoTabella.innerHTML = "";
@@ -575,9 +573,8 @@
 
             } catch (err) {
                 console.error("Dettaglio Errore Server:", err);
-                alert("Impossibile salvare i dati. Verifica di aver inserito il tuo URL e la KEY reali in cima allo script JavaScript.");
+                alert("Impossibile salvare i dati. Nota: l'errore è normale se non hai ancora inserito il tuo URL e la tua KEY reali di Supabase in cima al codice.");
             } finally {
-                // Ripristina lo stato iniziale del pulsante graficamente
                 btnInviaServer.disabled = false;
                 btnInviaServer.innerText = "Salva sul Database Cloud";
             }
@@ -585,4 +582,5 @@
     </script>
 </body>
 </html>
+
 
