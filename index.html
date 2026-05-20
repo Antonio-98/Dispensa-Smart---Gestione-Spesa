@@ -368,7 +368,7 @@
         
         // Inizializzazione sicura e condizionale del client Supabase
         let supabaseClient = null;
-        if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== "https://IL_TUO_PROJECT_URL.supabase.co") {
+        if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== "https://orskvejphkihjqblruvx.supabase.co/rest/v1/") {
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             } catch(e) {
