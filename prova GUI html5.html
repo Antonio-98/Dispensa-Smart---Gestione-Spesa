@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dispensa Smart - Gestione Inventario Casa</title>
+    
+    <style>
+        /* Stili Generali */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 30px;
+            color: #333;
+            overflow-x: hidden; /* Evita sfarfallii durante l'animazione laterale */
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 12px;
+        }
+
+        /* Form di inserimento in griglia */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 3;
+        }
+
+        label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        /* MODIFICA: Il finto campo di selezione categoria */
+        .finto-select {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-weight: normal;
+            color: #333;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .finto-select::after {
+            content: "▼";
+            font-size: 11px;
+            color: #718096;
+        }
+
+        /* MODIFICA: Il Menu a scelta laterale (Sidebar) */
+        .sidebar-categorie {
+            position: fixed;
+            top: 0;
+            right: -320px; /* Nascosto inizialmente fuori dallo schermo a destra */
+            width: 300px;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            padding: 25px;
+            box-sizing: border-box;
+            /* Transizione fluida di esattamente 1 secondo richiesta */
+            transition: right 1s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+
+        /* Classe attivata via JS per far scorrere la sidebar all'interno dello schermo */
+        .sidebar-categorie.aperta {
+            right: 0;
+        }
+
+        .sidebar-categorie h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Pulsante per chiudere la sidebar */
+        .btn-chiudi-sidebar {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #a0aec0;
+        }
+        .btn-chiudi-sidebar:hover { color: #e53e3e; }
+
+        /* Lista dei bottoni-categoria interni alla sidebar */
+        .opzioni-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-opzione {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .btn-opzione:hover {
+            background-color: #e2e8f0;
+            border-color: #cbd5e1;
+            padding-left: 18px; /* Piccolo effetto grafico di spostamento al passaggio del mouse */
+        }
+
+        /* Sfondo scuro semitrasparente che copre il resto del sito quando la sidebar è aperta */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .overlay.attivo {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Pulsanti */
+        .btn {
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-aggiungi {
+            background-color: #3498db;
+            width: 100%;
+            grid-column: span 3;
+        }
+        .btn-aggiungi:hover { background-color: #2980b9; }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-esporta { background-color: #2ecc71; }
+        .btn-esporta:hover { background-color: #27ae60; }
+
+        .btn-reset { background-color: #e53e3e; }
+        .btn-reset:hover { background-color: #c53030; }
+
+        /* Area Riepilogo Spesa */
+        .recap-box {
+            background-color: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2b6cb0;
+        }
+
+        /* Tabella Inventario */
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .btn-elimina {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-elimina:hover { background: #c53030; }
+    </style>
+</head>
+<body>
+
+    <!-- SFONDO SCURO DI COPERTURA -->
+    <div class="overlay" id="overlaySito"></div>
+
+    <!-- MENU LATERALE DELLE CATEGORIE -->
+    <div class="sidebar-categorie" id="sidebarCategorie">
+        <h3>
+            Scegli Categoria 
+            <button class="btn-chiudi-sidebar" id="btnChiudiSidebar">&times;</button>
+        </h3>
+        <div class="opzioni-lista">
+            <button class="btn-opzione" data-valore="Frutta">Frutta</button>
+            <button class="btn-opzione" data-valore="Verdure">Verdure</button>
+            <button class="btn-opzione" data-valore="Carboidrati">Carboidrati</button>
+            <button class="btn-opzione" data-valore="Carne">Carne</button>
+            <button class="btn-opzione" data-valore="Pesce">Pesce</button>
+            <button class="btn-opzione" data-valore="Latticini">Latticini</option>
+            <button class="btn-opzione" data-valore="Uova">Uova</button>
+            <button class="btn-opzione" data-valore="Altro">Altro</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Dispensa Smart - Gestione Spesa</h1>
+        
+        <!-- FORM DI INSERIMENTO PRODOTTI -->
+        <div class="form-grid">
+            <!-- Nome Prodotto -->
+            <div class="form-group full-width">
+                <label for="nomeProdotto">Nome Prodotto:</label>
+                <input type="text" id="nomeProdotto" placeholder="Es. Pane integrale, Petto di pollo..." autocomplete="off">
+            </div>
+
+            <!-- Categoria (Modificato: Finto input cliccabile anziché select) -->
+            <div class="form-group">
+                <label>Categoria (Classe):</label>
+                <div class="finto-select" id="campoCategoria">Seleziona...</div>
+            </div>
+
+            <!-- Prezzo Unitario -->
+            <div class="form-group">
+                <label for="prezzoProdotto">Prezzo Unitario (€):</label>
+                <input type="number" id="prezzoProdotto" step="0.01" min="0" placeholder="0.00" inputmode="decimal">
+            </div>
+
+            <!-- Quantità -->
+            <div class="form-group">
+                <label for="quantitaProdotto">Quantità:</label>
+                <input type="number" id="quantitaProdotto" min="1" value="1" inputmode="numeric">
+            </div>
+
+            <!-- Data di Acquisto -->
+            <div class="form-group">
+                <label for="dataAcquisto">Giorno di Acquisto:</label>
+                <input type="date" id="dataAcquisto">
+            </div>
+
+            <!-- Data di Scadenza -->
+            <div class="form-group full-width" style="grid-column: span 2;">
+                <label for="dataScadenza">Data di Scadenza:</label>
+                <input type="date" id="dateScadenza">
+            </div>
+
+            <!-- Pulsante inserimento -->
+            <button class="btn btn-aggiungi" id="btnAggiungi">Inserisci Prodotto nell'Inventario</button>
+        </div>
+
+        <!-- RIEPILOGO SPESA TOTALE -->
+        <div class="recap-box">
+            Totale Spesa Corrente: € <span id="totaleSpesa">0.00</span>
+        </div>
+
+        <!-- SEZIONE TABELLA INVENTARIO -->
+        <div id="sezioneInventario" style="display: none;">
+            <div class="action-buttons">
+                <button class="btn btn-esporta" id="btnEsporta">Esporta Inventario in Excel</button>
+                <button class="btn btn-reset" id="btnReset">Svuota Dispensa</button>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Prodotto</th>
+                            <th>Categoria</th>
+                            <th>Prezzo Unitario</th>
+                            <th>Q.tà</th>
+                            <th>Totale Riga</th>
+                            <th>Acquisto</th>
+                            <th>Scadenza</th>
+                            <th>Azione</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabella">
+                        <!-- Righe popolate da JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGICA JAVASCRIPT -->
+    <script>
+        let inventario = [];
+        let totaleEconomico = 0;
+        let categoriaSelezionata = ""; // Memorizza il valore scelto dalla sidebar
+
+        const inputNome = document.getElementById('nomeProdotto');
+        const campoCategoria = document.getElementById('campoCategoria');
+        const inputPrezzo = document.getElementById('prezzoProdotto');
+        const inputQuantita = document.getElementById('quantitaProdotto');
+        const inputAcquisto = document.getElementById('dataAcquisto');
+        const inputScadenza = document.getElementById('dateScadenza');
+        
+        const btnAggiungi = document.getElementById('btnAggiungi');
+        const btnEsporta = document.getElementById('btnEsporta');
+        const btnReset = document.getElementById('btnReset');
+        const corpoTabella = document.getElementById('corpoTabella');
+        const areaSpesa = document.getElementById('totaleSpesa');
+        const sezioneInventario = document.getElementById('sezioneInventario');
+
+        // Elementi per la gestione della Sidebar
+        const sidebar = document.getElementById('sidebarCategorie');
+        const overlay = document.getElementById('overlaySito');
+        const btnChiudiSidebar = document.getElementById('btnChiudiSidebar');
+        const bottoniOpzione = document.querySelectorAll('.btn-opzione');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const oggi = new Date();
+            const anno = oggi.getFullYear();
+            const mese = String(oggi.getMonth() + 1).padStart(2, '0');
+            const giorno = String(oggi.getDate()).padStart(2, '0');
+            
+            inputAcquisto.value = `${anno}-${mese}-${giorno}`;
+            caricaDatiSito();
+        });
+
+        // GESTIONE SIDEBAR: Aprire la sidebar
+        campoCategoria.addEventListener('click', () => {
+            sidebar.classList.add('aperta');
+            overlay.classList.add('attivo');
+        });
+
+        // GESTIONE SIDEBAR: Chiudere la sidebar (cliccando la X o lo sfondo scuro)
+        function chiudiSidebarMenu() {
+            sidebar.classList.remove('aperta');
+            overlay.classList.remove('attivo');
+        }
+        btnChiudiSidebar.addEventListener('click', chiudiSidebarMenu);
+        overlay.addEventListener('click', chiudiSidebarMenu);
+
+        // GESTIONE SIDEBAR: Selezione di un valore
+        bottoniOpzione.forEach(bottone => {
+            bottone.addEventListener('click', (e) => {
+                categoriaSelezionata = e.target.getAttribute('data-valore');
+                campoCategoria.innerText = categoriaSelezionata; // Scrive il valore nel form principale
+                campoCategoria.style.borderColor = "#cbd5e1"; // Eventuale reset colore errore
+                chiudiSidebarMenu();
+            });
+        });
+
+        // Azione: Aggiunta Prodotto
+        btnAggiungi.addEventListener('click', function() {
+            const nome = inputNome.value.trim();
+            const classe = categoriaSelezionata; // Legge la variabile della sidebar
+            const prezzo = parseFloat(inputPrezzo.value);
+            const quantita = parseInt(inputQuantita.value);
+            const acquisto = inputAcquisto.value;
+            const scadenza = inputScadenza.value;
+
+            if (nome === "") { alert("Inserisci il nome del prodotto!"); return; }
+            if (classe === "") { alert("Seleziona una categoria dalla lista laterale!"); campoCategoria.style.borderColor = "#e53e3e"; return; }
+            if (isNaN(prezzo) || prezzo < 0) { alert("Inserisci un prezzo valido!"); return; }
+            if (isNaN(quantita) || quantita < 1) { alert("Inserisci una quantità valida!"); return; }
+            if (!acquisto) { alert("Seleziona la data di acquisto!"); return; }
+            if (!scadenza) { alert("Seleziona la data di scadenza!"); return; }
+
+            const costoRiga = prezzo * quantita;
+            const idProdotto = Date.now();
+
+            const nuovoProdotto = { 
+                id: idProdotto, 
+                nome: nome, 
+                classe: classe, 
+                prezzo: prezzo, 
+                quantita: quantita, 
+                costoRiga: costoRiga,
+                acquisto: acquisto, 
+                scadenza: scadenza 
+            };
+            inventario.push(nuovoProdotto);
+
+            salvaDatiSito();
+            renderizzaRigaTabella(nuovoProdotto);
+            aggiornaPrezzoTotale();
+
+            // Svuota i moduli (inclusa la finta selezione)
+            inputNome.value = "";
+            inputPrezzo.value = "";
+            inputQuantita.value = "1";
+            inputScadenza.value = "";
+            categoriaSelezionata = "";
+            campoCategoria.innerText = "Seleziona...";
+        });
+
+        function renderizzaRigaTabella(prodotto) {
+            sezioneInventario.style.display = "block";
+            const riga = `
+                <tr id="riga-${prodotto.id}">
+                    <td><b>${prodotto.nome}</b></td>
+                    <td>${prodotto.classe}</td>
+                    <td>€ ${prodotto.prezzo.toFixed(2)}</td>
+                    <td>${prodotto.quantita}</td>
+                    <td>€ ${prodotto.costoRiga.toFixed(2)}</td>
+                    <td>${formattaData(prodotto.acquisto)}</td>
+                    <td>${formattaData(prodotto.scadenza)}</td>
+                    <td><button class="btn-elimina" onclick="eliminaProdotto(${prodotto.id})">Elimina</button></td>
+                </tr>`;
+            corpoTabella.innerHTML += riga;
+        }
+
+        function aggiornaPrezzoTotale() {
+            totaleEconomico = inventario.reduce((somma, item) => somma + item.costoRiga, 0);
+            areaSpesa.innerText = totaleEconomico.toFixed(2);
+            
+            if (inventario.length === 0) {
+                sezioneInventario.style.display = "none";
+            }
+        }
+
+        function formattaData(dataStringa) {
+            if(!dataStringa) return "";
+            const parti = dataStringa.split('-');
+            return `${parti}/${parti}/${parti}`;
+        }
+
+        window.eliminaProdotto = function(id) {
+            document.getElementById(`riga-${id}`).remove();
+            inventario = inventario.filter(item => item.id !== id);
+
+            salvaDatiSito();
+            aggiornaPrezzoTotale();
+        }
+
+        function salvaDatiSito() {
+            localStorage.setItem('inventarioSpesa_LocalStorage', JSON.stringify(inventario));
+        }
+
+        function caricaDatiSito() {
+            const datiSalvati = localStorage.getItem('inventarioSpesa_LocalStorage');
+            if (datiSalvati) {
+                inventario = JSON.parse(datiSalvati);
+                inventario.forEach(item => {
+                    renderizzaRigaTabella(item);
+                });
+                aggiornaPrezzoTotale();
+            }
+        }
+
+        btnReset.addEventListener('click', function() {
+            const conferma = confirm("Vuoi davvero svuotare tutto l'inventario? I dati inseriti andranno persi in modo definitivo.");
+            if (conferma) {
+                localStorage.removeItem('inventarioSpesa_LocalStorage');
+                inventario = [];
+                corpoTabella.innerHTML = "";
+                aggiornaPrezzoTotale();
+            }
+        });
+
+        btnEsporta.addEventListener('click', function() {
+            if (inventario.length === 0) return;
+
+            let contenutoCSV = "Prodotto;Categoria;Prezzo Unitario (€);Quantita;Totale Riga (€);Data Acquisto;Data Scadenza\n";
+
+            inventario.forEach(item => {
+                contentsCSV += `${item.nome};${item.classe};${item.prezzo.toFixed(2)};${item.quantita};${item.costoRiga.toFixed(2)};${formattaData(item.acquisto)};${formattaData(item.scadenza)}\n`;
+            });
+
+            const blob = new Blob(["\uFEFF" + contenutoCSV], { type: 'text/csv;charset=utf-8;' });
+            const linkDownload = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            linkDownload.setAttribute("href", url);
+            linkDownload.setAttribute("download", "inventario_spesa_casa.csv");
+            linkDownload.style.visibility = 'hidden';
+            
+            document.body.appendChild(linkDownload);
+            linkDownload.click();
+            document.body.removeChild(linkDownload);
+        });
+    </script>
+</body>
+</html>
