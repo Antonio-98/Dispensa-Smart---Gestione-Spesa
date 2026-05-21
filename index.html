@@ -316,8 +316,13 @@
         </div>
 
         <div class="form-group">
-            <label>Quantità:</label>
-            <input type="number" id="quantitaProdotto" value="1">
+            <label>Quantità (nr.):</label>
+            <input type="number" id="quantitaNumero" min="1">
+        </div>
+
+        <div class="form-group">
+            <label>Quantità (peso):</label>
+            <input type="number" id="quantitaPeso" step="0.01" min="0">
         </div>
 
         <div class="form-group">
@@ -400,7 +405,8 @@
 
     const inputNome = document.getElementById('nomeProdotto');
     const inputPrezzo = document.getElementById('prezzoProdotto');
-    const inputQuantita = document.getElementById('quantitaProdotto');
+    const inputQuantitaNumero = document.getElementById('quantitaNumero');
+    const inputQuantitaPeso = document.getElementById('quantitaPeso');
     const inputAcquisto = document.getElementById('dataAcquisto');
     const inputScadenza = document.getElementById('dataScadenza');
 
@@ -470,13 +476,33 @@
 
         const prezzo = parseFloat(inputPrezzo.value);
 
-        const quantita = parseInt(inputQuantita.value);
+        const quantitaNumero = parseFloat(inputQuantitaNumero.value);
+    
+        const quantitaPeso = parseFloat(inputQuantitaPeso.value);
 
         const acquisto = inputAcquisto.value;
 
         const scadenza = inputScadenza.value;
 
-        if (!nome || !categoriaSelezionata || isNaN(prezzo) || !quantita) {
+        // Controllo quale quantità usare
+        let quantita = null;
+    
+        if (!isNaN(quantitaNumero) && quantitaNumero > 0) {
+
+        quantita = quantitaNumero;
+
+        } else if (!isNaN(quantitaPeso) && quantitaPeso > 0) {
+
+        quantita = quantitaPeso;
+
+        }
+
+        if (
+        !nome ||
+        !categoriaSelezionata ||
+        isNaN(prezzo) ||
+        quantita === null
+        ) {
 
             alert("Compila tutti i campi!");
 
@@ -485,24 +511,41 @@
         }
 
         const prodotto = {
-
             id: Date.now(),
-
             nome,
-
             classe: categoriaSelezionata,
-
             prezzo,
-
             quantita,
-
             costoRiga: prezzo * quantita,
-
             acquisto,
-
             scadenza
 
         };
+
+        inventario.push(prodotto);
+    
+        salvaDati();
+    
+        renderizzaRiga(prodotto);
+    
+        aggiornaTotale();
+    
+        // Reset campi
+        inputNome.value = "";
+    
+        inputPrezzo.value = "";
+    
+        inputQuantitaNumero.value = "";
+    
+        inputQuantitaPeso.value = "";
+    
+        inputScadenza.value = "";
+    
+        categoriaSelezionata = "";
+    
+        campoCategoria.innerText = "Seleziona...";
+
+    });
 
         inventario.push(prodotto);
 
