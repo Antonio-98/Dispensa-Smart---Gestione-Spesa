@@ -109,9 +109,9 @@
         }
 
         .menu-laterale-campo.aperto {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(0) scale(1);
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: translateX(0) scale(1) !important;
         }
 
         .menu-laterale-campo h3 {
@@ -423,49 +423,64 @@
 
     const menuCategorie = document.getElementById('menuCategorie');
 
-    document.querySelectorAll('.btn-opzione').forEach(btn => {
+    // ===== MENU CATEGORIA =====
 
-        btn.addEventListener('click', () => {
-
-            categoriaSelezionata = btn.dataset.valore;
-
-            campoCategoria.innerText = categoriaSelezionata;
-
-            menuCategorie.classList.remove('aperto');
-
-        });
-
-    });
-
-    campoCategoria.addEventListener('click', (e) => {
-
-    e.stopPropagation();
-
-    menuCategorie.classList.toggle('aperto');
-
-    });
-
-    // Evita chiusura immediata del menu
-    menuCategorie.addEventListener('click', (e) => {
-
-        e.stopPropagation();
-
-    });
-
-    // Chiusura cliccando fuori
-    document.addEventListener('click', () => {
+    // Apertura menu
+    campoCategoria.onclick = function(event) {
     
-        menuCategorie.classList.remove('aperto');
-
+        event.stopPropagation();
+    
+        if (menuCategorie.classList.contains("aperto")) {
+    
+            menuCategorie.classList.remove("aperto");
+    
+        } else {
+    
+            menuCategorie.classList.add("aperto");
+    
+        }
+    
+    };
+    
+    // Click sulle categorie
+    document.querySelectorAll('.btn-opzione').forEach(btn => {
+    
+        btn.onclick = function(event) {
+    
+            event.stopPropagation();
+    
+            categoriaSelezionata = this.dataset.valore;
+    
+            campoCategoria.innerText = categoriaSelezionata;
+    
+            menuCategorie.classList.remove("aperto");
+    
+        };
+    
     });
-
-    // Pulsante X chiusura
-    document.getElementById('btnChiudiMenu')
-        .addEventListener('click', () => {
-
-            menuCategorie.classList.remove('aperto');
-
-        });
+    
+    // Evita chiusura cliccando dentro il menu
+    menuCategorie.onclick = function(event) {
+    
+        event.stopPropagation();
+    
+    };
+    
+    // Chiusura cliccando fuori
+    document.body.onclick = function() {
+    
+        menuCategorie.classList.remove("aperto");
+    
+    };
+    
+    // Pulsante X
+    btnChiudiMenu.onclick = function(event) {
+    
+        event.stopPropagation();
+    
+        menuCategorie.classList.remove("aperto");
+    
+    };
 
     window.addEventListener('DOMContentLoaded', () => {
 
