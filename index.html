@@ -439,18 +439,27 @@
 
     campoCategoria.addEventListener('click', (e) => {
 
-        e.stopPropagation();
+    e.stopPropagation();
 
-        menuCategorie.classList.toggle('aperto');
+    menuCategorie.classList.toggle('aperto');
 
     });
 
-    document.addEventListener('click', () => {
+    // Evita chiusura immediata del menu
+    menuCategorie.addEventListener('click', (e) => {
 
+        e.stopPropagation();
+
+    });
+
+    // Chiusura cliccando fuori
+    document.addEventListener('click', () => {
+    
         menuCategorie.classList.remove('aperto');
 
     });
 
+    // Pulsante X chiusura
     document.getElementById('btnChiudiMenu')
         .addEventListener('click', () => {
 
